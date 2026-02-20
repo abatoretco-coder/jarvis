@@ -1,6 +1,12 @@
+import type { JarvisAction } from '../actions/types';
+
 export type SkillRunContext = {
   requestId: string;
   now: Date;
+  execute: boolean;
+  env: {
+    haEntityAliases?: Record<string, string>;
+  };
   ha: {
     callService: (input: {
       domain: string;
@@ -16,7 +22,7 @@ export type SkillMatch = { score: number; intent?: string };
 export type SkillRunResult = {
   intent: string;
   result: unknown;
-  actions: Array<Record<string, unknown>>;
+  actions: JarvisAction[];
 };
 
 export type SkillInput = {

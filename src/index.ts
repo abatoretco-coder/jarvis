@@ -1,14 +1,26 @@
 import { loadEnv } from './config/env';
 import { buildServer } from './server';
 import { homeAssistantSkill } from './skills/homeAssistant';
+import { lightsSkill } from './skills/lights';
 import { musicSkill } from './skills/music';
 import { pingSkill } from './skills/ping';
+import { robotSkill } from './skills/robot';
 import { timeSkill } from './skills/time';
 import { timerSkill } from './skills/timer';
+import { todoSkill } from './skills/todo';
 
 async function main() {
   const env = loadEnv();
-  const skills = [pingSkill, timeSkill, timerSkill, homeAssistantSkill, musicSkill];
+  const skills = [
+    pingSkill,
+    timeSkill,
+    todoSkill,
+    timerSkill,
+    lightsSkill,
+    homeAssistantSkill,
+    musicSkill,
+    robotSkill,
+  ];
 
   const app = await buildServer(env, skills);
 

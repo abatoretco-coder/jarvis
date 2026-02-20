@@ -4,7 +4,7 @@ export type RoutedSkillResult = {
   skill: string;
   intent: string;
   result: unknown;
-  actions: Array<Record<string, unknown>>;
+  actions: import('../actions/types').JarvisAction[];
 };
 
 export async function routeAndRun(

@@ -43,7 +43,7 @@ export const homeAssistantSkill: Skill = {
       return { score: 0.2, intent: 'ha.unknown' };
     return { score: 0 };
   },
-  run: async (input, ctx) => {
+  run: async (input, _ctx) => {
     const parsed = tryParseExplicitHaCommand(input.text);
     if (!parsed) {
       return {
@@ -65,18 +65,14 @@ export const homeAssistantSkill: Skill = {
       else serviceData[k] = v;
     }
 
-    const haResp = await ctx.ha.callService({
-      domain: parsed.domain,
-      service: parsed.service,
-      serviceData,
-      target,
-    });
-
     return {
       intent: `ha.${parsed.domain}.${parsed.service}`,
       result: {
-        haStatus: haResp.status,
-        haData: haResp.data,
+        planned: true,
+        domain: parsed.domain,
+        service: parsed.service,
+        target,
+        serviceData,
       },
       actions: [
         {

@@ -64,6 +64,25 @@ curl -s http://<VM300_IP>:8080/v1/command \
   -d '{"text":"ping"}'
 ```
 
+### Mode “cerveau” (plan vs execute)
+
+Pour ton architecture (VM400 agrège les entrées, Jarvis planifie), le comportement recommandé est :
+
+- VM300/Jarvis en **plan** (ne déclenche rien) → renvoie `actions[]`
+- VM400 exécute via ses connecteurs (Home Assistant, Microsoft To Do, musique, robot, etc.)
+
+Active le mode plan par défaut dans `.env` Jarvis (VM300) :
+
+```dotenv
+EXECUTE_ACTIONS=false
+```
+
+Tu peux aussi forcer par requête :
+
+```json
+{ "text": "...", "options": { "execute": false } }
+```
+
 ## 3) Home Assistant (VM400) → Jarvis
 
 Dans Home Assistant, configure un `rest_command` qui pointe vers Jarvis sur VM300.
@@ -78,7 +97,8 @@ rest_command:
     headers:
       content-type: application/json
       x-api-key: '!secret jarvis_api_key'
-    payload: '{"text":"{{ text }}"}'
+    # Recommended: force plan mode so VM400 stays in control of execution
+    payload: '{"text":"{{ text }}","options":{"execute":false}}'
     timeout: 10
 ```
 
@@ -100,6 +120,18 @@ Concrètement :
   - parler la réponse (TTS)
   - déclencher des services HA
   - logguer / notifier
+
+### Catalogue d’actions (v0.1)
+
+Jarvis renvoie des actions codifiées dans `actions[]` (et éventuellement `executedActions[]` si `execute=true`).
+
+Types existants :
+
+- `home_assistant.service_call`
+- `todo.add_task` (planifié, à exécuter via un connecteur Microsoft To Do sur VM400)
+- `music.play_request` (planifié)
+- `robot.start` (planifié)
+- `timer.requested` (planifié)
 
 Si tu veux que VM400 envoie des événements structurés (pas du texte), dis-moi et j’ajoute un endpoint `POST /v1/event` (avec schéma Zod) + une skill “events”.
 

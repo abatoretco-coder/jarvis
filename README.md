@@ -38,6 +38,14 @@ curl -s http://localhost:8080/v1/command \
   -d '{"text":"ping"}' | jq
 ```
 
+Plan-only mode (recommended when VM400 orchestrates execution):
+
+```bash
+curl -s http://localhost:8080/v1/command \
+  -H 'content-type: application/json' \
+  -d '{"text":"ping","options":{"execute":false}}' | jq
+```
+
 Home Assistant skill (explicit command format):
 
 ```bash

@@ -21,9 +21,11 @@ const envSchema = z
     CORS_ORIGIN: z.string().optional(),
     REQUIRE_API_KEY: booleanFromEnv.default('false'),
     API_KEY: z.string().min(1).optional(),
+    EXECUTE_ACTIONS: booleanFromEnv.default('false'),
     HA_BASE_URL: z.string().url(),
     HA_TOKEN: z.string().min(1),
     HA_TIMEOUT_MS: numberFromEnv.default('10000'),
+    HA_ENTITY_ALIASES_JSON: z.string().optional(),
     BUILD_SHA: z.string().optional(),
     BUILD_TIME: z.string().optional(),
   })
@@ -34,6 +36,25 @@ const envSchema = z
         path: ['API_KEY'],
         message: 'API_KEY is required when REQUIRE_API_KEY=true',
       });
+    }
+
+    if (val.HA_ENTITY_ALIASES_JSON) {
+      try {
+        const parsed = JSON.parse(val.HA_ENTITY_ALIASES_JSON) as unknown;
+        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['HA_ENTITY_ALIASES_JSON'],
+            message: 'must be a JSON object mapping alias -> entity_id',
+          });
+        }
+      } catch {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['HA_ENTITY_ALIASES_JSON'],
+          message: 'must be valid JSON',
+        });
+      }
     }
   });
 

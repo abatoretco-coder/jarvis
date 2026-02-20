@@ -23,7 +23,7 @@ export const musicSkill: Skill = {
           { step: 'playback', device: 'TODO' },
         ],
       },
-      actions: [],
+      actions: query ? [{ type: 'music.play_request', query }] : [],
     };
   },
 };
