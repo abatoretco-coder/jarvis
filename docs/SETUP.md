@@ -149,3 +149,7 @@ Health endpoints remain unauthenticated for monitoring.
 ## Voice commands
 
 See [docs/VOICE.md](VOICE.md) for wiring Home Assistant Assist voice → Jarvis text commands.
+
+## Multi-VM (VM300 + VM400)
+
+If you plan to run Home Assistant on a separate VM (e.g. VM400) and Jarvis on VM300, see [docs/MULTI_VM.md](MULTI_VM.md).
