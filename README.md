@@ -135,4 +135,6 @@ VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
 
 French step-by-step: see [docs/INSTRUCTIONS_FR.md](docs/INSTRUCTIONS_FR.md).
 
+Home Assistant controllers (Plex/Hue/Xiaomi/Spotify): see [docs/HOME_ASSISTANT_CONTROLLERS.md](docs/HOME_ASSISTANT_CONTROLLERS.md).
+
 VM400 orchestrator reference service: see `obeissant/`.
