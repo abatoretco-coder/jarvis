@@ -60,4 +60,3 @@ jobs:
           build-args: |
             BUILD_SHA=${{ github.sha }}
             BUILD_TIME=${{ env.BUILD_TIME }}
-

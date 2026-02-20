@@ -1,27 +1,7 @@
+import { parseKeyValueArgs } from '../lib/parseArgs';
 import type { Skill, SkillInput } from './types';
 
-function parseKeyValueArgs(argString: string): Record<string, unknown> {
-  const out: Record<string, unknown> = {};
-  const parts = argString
-    .split(' ')
-    .map((p) => p.trim())
-    .filter(Boolean);
-
-  for (const part of parts) {
-    const eq = part.indexOf('=');
-    if (eq === -1) continue;
-    const key = part.slice(0, eq).trim();
-    const raw = part.slice(eq + 1).trim();
-    if (!key) continue;
-
-    if (/^\d+$/.test(raw)) out[key] = Number(raw);
-    else if (raw === 'true') out[key] = true;
-    else if (raw === 'false') out[key] = false;
-    else out[key] = raw;
-  }
-
-  return out;
-}
+const supportedTargetKeys = new Set(['entity_id', 'area_id', 'device_id', 'floor_id', 'label_id']);
 
 function tryParseExplicitHaCommand(text: string):
   | {
@@ -45,10 +25,9 @@ function tryParseExplicitHaCommand(text: string):
   if (!domain || !service) return undefined;
 
   const payload = parseKeyValueArgs(rest.join(' '));
-  const entityId = payload.entity_id;
-  if (typeof entityId !== 'string' || entityId.length === 0) {
-    return undefined;
-  }
+
+  const hasAnyTarget = Object.keys(payload).some((k) => supportedTargetKeys.has(k));
+  if (!hasAnyTarget) return undefined;
 
   return { domain, service, payload };
 }
@@ -71,19 +50,26 @@ export const homeAssistantSkill: Skill = {
         intent: 'ha.unknown',
         result: {
           message: 'Home Assistant skill requires explicit format in v0.1.',
-          format: 'ha: <domain>.<service> entity_id=<entity_id> key=value ...',
+          format: 'ha: <domain>.<service> entity_id=<id>|area_id=<id>|device_id=<id> key=value ...',
           example: 'ha: light.turn_on entity_id=light.kitchen brightness_pct=40',
+          quoting: 'Use quotes for spaces: name="Kitchen Light"',
         },
         actions: [],
       };
     }
 
-    const { entity_id: entityId, ...serviceData } = parsed.payload;
+    const target: Record<string, unknown> = {};
+    const serviceData: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(parsed.payload)) {
+      if (supportedTargetKeys.has(k)) target[k] = v;
+      else serviceData[k] = v;
+    }
+
     const haResp = await ctx.ha.callService({
       domain: parsed.domain,
       service: parsed.service,
       serviceData,
-      target: { entity_id: entityId },
+      target,
     });
 
     return {
@@ -97,7 +83,7 @@ export const homeAssistantSkill: Skill = {
           type: 'home_assistant.service_call',
           domain: parsed.domain,
           service: parsed.service,
-          target: { entity_id: entityId },
+          target,
           serviceData,
         },
       ],

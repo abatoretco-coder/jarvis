@@ -36,6 +36,8 @@ Optional:
 
 - `ALLOW_CORS` (`true`/`false`, default `false`)
 - `CORS_ORIGIN` (if CORS enabled; default `*`)
+- `REQUIRE_API_KEY` (`true`/`false`, default `false`)
+- `API_KEY` (required if `REQUIRE_API_KEY=true`)
 - `BUILD_SHA`, `BUILD_TIME` (set by Docker build)
 
 ## Build and push to GHCR
@@ -136,5 +138,10 @@ curl -s http://<jarvis-host>:8080/v1/command \
 
 ## Security TODO
 
-No authentication is implemented in v0.1 (intended for a trusted network behind firewall/Tailscale).
-TODO for v0.2+: add an API key (`X-API-Key`) and/or mTLS.
+Jarvis supports optional API-key auth for `/v1/*` endpoints:
+
+- Set `REQUIRE_API_KEY=true`
+- Set `API_KEY=<your secret>`
+- Send `X-API-Key: <your secret>`
+
+Health endpoints remain unauthenticated for monitoring.

@@ -9,8 +9,10 @@ export function createLoggerOptions(env: Env): LoggerOptions {
       paths: [
         'req.headers.authorization',
         'req.headers.cookie',
+        'req.headers.x-api-key',
         'request.headers.authorization',
         'request.headers.cookie',
+        'request.headers.x-api-key',
       ],
       remove: true,
     },

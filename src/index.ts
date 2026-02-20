@@ -3,10 +3,12 @@ import { buildServer } from './server';
 import { homeAssistantSkill } from './skills/homeAssistant';
 import { musicSkill } from './skills/music';
 import { pingSkill } from './skills/ping';
+import { timeSkill } from './skills/time';
+import { timerSkill } from './skills/timer';
 
 async function main() {
   const env = loadEnv();
-  const skills = [pingSkill, homeAssistantSkill, musicSkill];
+  const skills = [pingSkill, timeSkill, timerSkill, homeAssistantSkill, musicSkill];
 
   const app = await buildServer(env, skills);
 

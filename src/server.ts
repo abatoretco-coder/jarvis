@@ -18,6 +18,11 @@ declare module 'fastify' {
   }
 }
 
+function isProtectedV1Route(url?: string): boolean {
+  if (!url) return false;
+  return url === '/v1' || url.startsWith('/v1/');
+}
+
 export async function buildServer(env: Env, skills: Skill[]) {
   const app = Fastify({
     logger: createLoggerOptions(env),
@@ -40,6 +45,20 @@ export async function buildServer(env: Env, skills: Skill[]) {
 
   app.addHook('onRequest', async (req) => {
     req.log = req.log.child({ requestId: req.id });
+  });
+
+  app.addHook('preHandler', async (req, reply) => {
+    if (!env.REQUIRE_API_KEY) return;
+    if (!isProtectedV1Route(req.url)) return;
+
+    const provided = req.headers['x-api-key'];
+    if (typeof provided !== 'string' || !provided || provided !== env.API_KEY) {
+      return reply.code(401).send({
+        requestId: req.id,
+        error: 'unauthorized',
+        message: 'Missing or invalid X-API-Key',
+      });
+    }
   });
 
   app.get('/', async (_req, reply) => {

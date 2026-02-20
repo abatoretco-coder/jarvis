@@ -54,6 +54,22 @@ curl -s http://localhost:8080/v1/command \
   -d '{"text":"play music lo-fi"}' | jq
 ```
 
+Time skill:
+
+```bash
+curl -s http://localhost:8080/v1/command \
+  -H 'content-type: application/json' \
+  -d '{"text":"time"}' | jq
+```
+
+Timer skill (stub):
+
+```bash
+curl -s http://localhost:8080/v1/command \
+  -H 'content-type: application/json' \
+  -d '{"text":"timer 5m"}' | jq
+```
+
 ### POST /v1/ha/service
 
 ```bash
@@ -65,6 +81,17 @@ curl -s http://localhost:8080/v1/ha/service \
     "target": {"entity_id":"light.kitchen"},
     "serviceData": {"brightness_pct": 40}
   }' | jq
+```
+
+## Optional API key
+
+Set `REQUIRE_API_KEY=true` and `API_KEY=...` and send `X-API-Key` on `/v1/*` endpoints.
+
+```bash
+curl -s http://localhost:8080/v1/command \
+  -H 'content-type: application/json' \
+  -H 'x-api-key: YOUR_KEY' \
+  -d '{"text":"ping"}' | jq
 ```
 
 ## Docs
