@@ -32,7 +32,7 @@ export async function routeAndRun(
       intent: 'unknown',
       result: {
         message: "I didn't recognize that command.",
-        hint: 'Try: ping | ha: <domain>.<service> entity_id=<entity_id> | play music <query>',
+        hint: 'Try: ping | todo: buy milk | turn on kitchen light 40% | ha: <domain>.<service> entity_id=<id> | read my emails | play music <query>',
       },
       actions: [],
     };

@@ -133,6 +133,8 @@ Types existants :
 - `robot.start` (planifié)
 - `timer.requested` (planifié)
 
+Execution layer notes: see [docs/CONNECTORS.md](CONNECTORS.md).
+
 Si tu veux que VM400 envoie des événements structurés (pas du texte), dis-moi et j’ajoute un endpoint `POST /v1/event` (avec schéma Zod) + une skill “events”.
 
 ## 5) Checklist rapide

@@ -29,12 +29,24 @@ export type TimerRequestedAction = {
   requestedAt: string;
 };
 
+export type ConnectorName = 'email' | 'whatsapp' | 'messenger' | 'sms';
+
+export type ConnectorOperation = 'read_latest' | 'summarize' | 'search';
+
+export type ConnectorRequestAction = {
+  type: 'connector.request';
+  connector: ConnectorName;
+  operation: ConnectorOperation;
+  params?: Record<string, unknown>;
+};
+
 export type JarvisAction =
   | HomeAssistantServiceCallAction
   | TodoAddTaskAction
   | MusicPlayRequestAction
   | RobotStartAction
-  | TimerRequestedAction;
+  | TimerRequestedAction
+  | ConnectorRequestAction;
 
 export type ExecutedAction = {
   action: JarvisAction;

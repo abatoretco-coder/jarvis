@@ -1,6 +1,7 @@
 import { loadEnv } from './config/env';
 import { buildServer } from './server';
 import { homeAssistantSkill } from './skills/homeAssistant';
+import { inboxSkill } from './skills/inbox';
 import { lightsSkill } from './skills/lights';
 import { musicSkill } from './skills/music';
 import { pingSkill } from './skills/ping';
@@ -18,6 +19,7 @@ async function main() {
     timerSkill,
     lightsSkill,
     homeAssistantSkill,
+    inboxSkill,
     musicSkill,
     robotSkill,
   ];

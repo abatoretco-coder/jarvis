@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { Env } from './config/env';
 import { buildServer } from './server';
 import { homeAssistantSkill } from './skills/homeAssistant';
+import { inboxSkill } from './skills/inbox';
 import { pingSkill } from './skills/ping';
 import { timeSkill } from './skills/time';
 
@@ -89,6 +90,23 @@ describe('server', () => {
     expect(body.skill).toBe('time');
     expect(body.intent).toBe('time.now');
     expect(body.result.iso).toBeTypeOf('string');
+    await app.close();
+  });
+
+  it('POST /v1/command routes inbox (email)', async () => {
+    const app = await buildServer(env, [inboxSkill]);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: 'read my emails', options: { execute: false } },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.skill).toBe('inbox');
+    expect(body.actions.length).toBe(1);
+    expect(body.actions[0].type).toBe('connector.request');
+    expect(body.actions[0].connector).toBe('email');
+    expect(body.mode).toBe('plan');
     await app.close();
   });
 

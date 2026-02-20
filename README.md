@@ -111,3 +111,5 @@ Voice commands: see [docs/VOICE.md](docs/VOICE.md).
 Voice satellites (Raspberry Pi / Bluetooth): see [docs/VOICE_SATELLITES.md](docs/VOICE_SATELLITES.md).
 
 Multi-VM (VM300 Jarvis + VM400 Home Assistant): see [docs/MULTI_VM.md](docs/MULTI_VM.md).
+
+VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
