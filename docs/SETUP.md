@@ -33,6 +33,33 @@ npm run dev
 
 Jarvis is configured entirely through environment variables (no secrets in git).
 
+## Change config without redeploying code
+
+Jarvis + Home Assistant are designed to be configurable **without editing code**:
+
+- Jarvis: edit `jarvis/.env` then restart the container.
+- Home Assistant: configure integrations from the UI; settings persist in `/config` (the mounted volume).
+
+Typical workflow (VM300/prod):
+
+```bash
+cd /opt/naas/stacks/jarvis
+nano jarvis/.env
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Or restart a single service:
+
+```bash
+docker compose -f docker-compose.prod.yml restart jarvis
+```
+
+Home Assistant persistence:
+
+- Config lives in `/opt/naas/appdata/homeassistant/` (because it is mounted to `/config`)
+- After changing integrations in the UI, no Docker rebuild is needed
+
+
 Required:
 
 - `PORT` (default `8080`)

@@ -3,6 +3,8 @@
 This repo runs Home Assistant as a container service in the root compose stack.
 Once Home Assistant is up, controllers are added via **Settings → Devices & services → Add integration**.
 
+These settings are stored in Home Assistant’s `/config` directory (persisted via the mounted volume), so you can change integrations/settings **without rebuilding any Docker image**.
+
 Home Assistant UI:
 
 - Dev: `http://localhost:8123`

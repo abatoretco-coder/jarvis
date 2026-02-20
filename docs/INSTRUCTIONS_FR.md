@@ -184,6 +184,27 @@ Comme ça VM400 orchestre TOUT (connecteurs, exécution, TTS).
 - `Gmail connector not configured` : variables Gmail manquantes
 - Réseau : VM400 doit atteindre VM300:8080 (firewall/ACL)
 
+## Modifier la config sans redéployer (sans code)
+
+Le principe :
+
+- Jarvis / Obéissant : tu modifies les fichiers `.env`, puis tu redémarres le conteneur.
+- Home Assistant : tu ajoutes/configures les intégrations depuis l’UI ; tout est persisté dans `/config` (sur disque via le volume).
+
+Exemple (VM300) :
+
+```bash
+cd /opt/naas/stacks/jarvis
+nano jarvis/.env
+docker compose -f docker-compose.prod.yml up -d
+```
+
+Redémarrer seulement Jarvis :
+
+```bash
+docker compose -f docker-compose.prod.yml restart jarvis
+```
+
 ## 8) Limits / conformité
 
 - WhatsApp/Messenger personnels : pas d’API propre officielle → privilégie Business API ou notifications HA.
