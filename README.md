@@ -3,14 +3,21 @@
 Monorepo layout:
 
 - `jarvis/`: VM300 brain (text → codified actions)
-- `obeissant/`: VM400 execution layer (connectors like Gmail + Android SMS)
+- `obeissant/`: (optional) VM400 execution layer (connectors like Gmail + Android SMS)
+
+Stack compose includes `homeassistant` as a container service.
 
 ## Quickstart (local dev via Docker)
 
-1. Create env files:
+1. Create Jarvis env file:
 
 ```bash
 cp jarvis/.env.example jarvis/.env
+```
+
+Optional (VM400 connector executor):
+
+```bash
 cp obeissant/.env.example obeissant/.env
 ```
 
@@ -24,7 +31,14 @@ docker compose -f docker-compose.dev.yml up --build
 
 ```bash
 curl -s http://localhost:8080/health | jq
-curl -s http://localhost:8090/health | jq
+```
+
+Home Assistant UI will be on `http://localhost:8123`.
+
+To also run VM400 connectors (optional):
+
+```bash
+docker compose -f docker-compose.dev.yml --profile vm400 up --build
 ```
 
 ## API

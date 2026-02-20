@@ -34,11 +34,16 @@ Ce dépôt contient :
 
 ```bash
 cp jarvis/.env.example jarvis/.env
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Home Assistant (UI) : `http://localhost:8123`.
+
+Optionnel (démarrer aussi Obéissant / VM400) :
+
+```bash
 cp obeissant/.env.example obeissant/.env
-cd jarvis
-# Renseigne HA_BASE_URL et HA_TOKEN (ou laisse si tu testes sans HA)
-npm install
-npm run dev
+docker compose -f docker-compose.dev.yml --profile vm400 up --build
 ```
 
 Test :
@@ -64,7 +69,6 @@ git clone https://github.com/<user>/jarvis.git /opt/naas/stacks/jarvis
 cd /opt/naas/stacks/jarvis
 
 cp jarvis/.env.example jarvis/.env
-cp obeissant/.env.example obeissant/.env
 
 docker compose -f docker-compose.prod.yml up -d
 ```

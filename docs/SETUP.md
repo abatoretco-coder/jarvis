@@ -6,8 +6,16 @@
 
 ```bash
 cp jarvis/.env.example jarvis/.env
-cp obeissant/.env.example obeissant/.env
 docker compose -f docker-compose.dev.yml up --build
+```
+
+Home Assistant will be available at `http://localhost:8123`.
+
+Optional (also run VM400 connectors):
+
+```bash
+cp obeissant/.env.example obeissant/.env
+docker compose -f docker-compose.dev.yml --profile vm400 up --build
 ```
 
 The service listens on `http://localhost:8080` by default.
@@ -90,12 +98,17 @@ sudo mkdir -p /opt/naas/logs/jarvis
 cd /opt/naas/stacks/jarvis
 ```
 
-Deploy by cloning (recommended) so the `jarvis/` and `obeissant/` folders exist:
+Deploy by cloning (recommended):
 
 ```bash
 git clone https://github.com/<user>/jarvis.git /opt/naas/stacks/jarvis
 cd /opt/naas/stacks/jarvis
 cp jarvis/.env.example jarvis/.env
+```
+
+Optional (only if you want to run VM400 connectors from the same stack folder):
+
+```bash
 cp obeissant/.env.example obeissant/.env
 ```
 

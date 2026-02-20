@@ -10,6 +10,7 @@ services:
     restart: unless-stopped
 
   obeissant:
+    profiles: ["vm400"]
     build:
       context: ./obeissant
     ports:
@@ -22,7 +23,6 @@ services:
 
   homeassistant:
     image: ghcr.io/home-assistant/home-assistant:stable
-    profiles: ["ha"]
     ports:
       - '8123:8123'
     volumes:
