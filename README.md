@@ -97,3 +97,5 @@ curl -s http://localhost:8080/v1/command \
 ## Docs
 
 See [docs/SETUP.md](docs/SETUP.md).
+
+Voice commands: see [docs/VOICE.md](docs/VOICE.md).

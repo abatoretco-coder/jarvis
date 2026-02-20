@@ -145,3 +145,7 @@ Jarvis supports optional API-key auth for `/v1/*` endpoints:
 - Send `X-API-Key: <your secret>`
 
 Health endpoints remain unauthenticated for monitoring.
+
+## Voice commands
+
+See [docs/VOICE.md](VOICE.md) for wiring Home Assistant Assist voice → Jarvis text commands.
