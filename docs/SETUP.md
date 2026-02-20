@@ -40,6 +40,11 @@ Optional:
 
 ## Build and push to GHCR
 
+If you use GitHub Actions, this repo includes a workflow that publishes to GHCR:
+
+- On push to `main`: publishes `:main` and `:sha-<short>`
+- On tag `vX.Y.Z`: publishes `:X.Y.Z` and `:latest`
+
 1. Authenticate Docker to GHCR:
 
 ```bash
