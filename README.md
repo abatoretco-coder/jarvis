@@ -113,3 +113,5 @@ Voice satellites (Raspberry Pi / Bluetooth): see [docs/VOICE_SATELLITES.md](docs
 Multi-VM (VM300 Jarvis + VM400 Home Assistant): see [docs/MULTI_VM.md](docs/MULTI_VM.md).
 
 VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
+
+Optional VM400 orchestrator reference service: see `vm400-orchestrator/`.

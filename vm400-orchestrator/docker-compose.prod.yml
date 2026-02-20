@@ -1,0 +1,11 @@
+services:
+  vm400-orchestrator:
+    build:
+      context: .
+    ports:
+      - '8090:8090'
+    env_file:
+      - .env
+    volumes:
+      - /opt/naas/appdata/jarvis-vm400:/app/data
+    restart: unless-stopped

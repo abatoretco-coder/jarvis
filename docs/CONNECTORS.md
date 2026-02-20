@@ -40,3 +40,12 @@ Some platforms don’t provide a clean API for _personal_ accounts:
 - Email: best options are Microsoft Graph (Outlook/Exchange), Gmail API, or IMAP (self-hosted).
 
 Recommendation: start with **Email + HA notifications**, then add WhatsApp/Messenger only via official/business integrations.
+
+## Your setup: Gmail + Android
+
+Recommended path:
+
+1. Use Gmail API (OAuth) on VM400 to read latest emails and summarize.
+2. For SMS: push messages from Android → VM400 via HTTP webhook (simple, ToS-friendly), store locally, then Jarvis can request `sms.read_latest`.
+
+This repo includes an optional reference service under `vm400-orchestrator/`.
