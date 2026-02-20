@@ -1,8 +1,30 @@
 services:
   jarvis:
     image: ghcr.io/<user>/jarvis:<tag>
+    build:
+      context: ./jarvis
     ports:
       - '8080:8080'
     env_file:
-      - .env
+      - ./jarvis/.env
+    restart: unless-stopped
+
+  obeissant:
+    build:
+      context: ./obeissant
+    ports:
+      - '8090:8090'
+    env_file:
+      - ./obeissant/.env
+    volumes:
+      - /opt/naas/appdata/jarvis-vm400:/app/data
+    restart: unless-stopped
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    profiles: ["ha"]
+    ports:
+      - '8123:8123'
+    volumes:
+      - /opt/naas/appdata/homeassistant:/config
     restart: unless-stopped

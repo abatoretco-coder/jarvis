@@ -10,6 +10,12 @@ export type GmailItem = {
   internalDateMs?: number;
 };
 
+function toOptionalString(value: unknown): string | undefined {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
+}
+
 function requireGmail(env: Env) {
   const missing: string[] = [];
   if (!env.GMAIL_CLIENT_ID) missing.push('GMAIL_CLIENT_ID');
@@ -46,8 +52,10 @@ export async function readLatestEmails(env: Env, limit: number): Promise<GmailIt
     });
 
     const headers = msg.data.payload?.headers ?? [];
-    const from = headers.find((h) => h.name?.toLowerCase() === 'from')?.value;
-    const subject = headers.find((h) => h.name?.toLowerCase() === 'subject')?.value;
+    const from = toOptionalString(headers.find((h) => h.name?.toLowerCase() === 'from')?.value);
+    const subject = toOptionalString(
+      headers.find((h) => h.name?.toLowerCase() === 'subject')?.value
+    );
     items.push({
       id,
       from,

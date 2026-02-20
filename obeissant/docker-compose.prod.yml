@@ -1,5 +1,5 @@
 services:
-  vm400-orchestrator:
+  obeissant:
     build:
       context: .
     ports:

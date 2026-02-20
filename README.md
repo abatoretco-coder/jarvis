@@ -1,13 +1,17 @@
-# Jarvis (v0.1)
+# Jarvis stack (v0.1)
 
-Minimal command router service with a small skills system and Home Assistant integration.
+Monorepo layout:
+
+- `jarvis/`: VM300 brain (text → codified actions)
+- `obeissant/`: VM400 execution layer (connectors like Gmail + Android SMS)
 
 ## Quickstart (local dev via Docker)
 
-1. Create `.env`:
+1. Create env files:
 
 ```bash
-cp .env.example .env
+cp jarvis/.env.example jarvis/.env
+cp obeissant/.env.example obeissant/.env
 ```
 
 2. Start:
@@ -20,6 +24,7 @@ docker compose -f docker-compose.dev.yml up --build
 
 ```bash
 curl -s http://localhost:8080/health | jq
+curl -s http://localhost:8090/health | jq
 ```
 
 ## API
@@ -116,4 +121,4 @@ VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
 
 French step-by-step: see [docs/INSTRUCTIONS_FR.md](docs/INSTRUCTIONS_FR.md).
 
-Optional VM400 orchestrator reference service: see `vm400-orchestrator/`.
+VM400 orchestrator reference service: see `obeissant/`.

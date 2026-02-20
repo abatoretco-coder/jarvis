@@ -48,4 +48,4 @@ Recommended path:
 1. Use Gmail API (OAuth) on VM400 to read latest emails and summarize.
 2. For SMS: push messages from Android → VM400 via HTTP webhook (simple, ToS-friendly), store locally, then Jarvis can request `sms.read_latest`.
 
-This repo includes an optional reference service under `vm400-orchestrator/`.
+This repo includes an optional reference service under `obeissant/`.

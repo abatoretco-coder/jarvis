@@ -1,0 +1,8 @@
+services:
+  jarvis:
+    image: ghcr.io/<user>/jarvis:<tag>
+    ports:
+      - '8080:8080'
+    env_file:
+      - .env
+    restart: unless-stopped

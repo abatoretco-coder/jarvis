@@ -5,15 +5,17 @@
 ### Option A: Docker compose (recommended)
 
 ```bash
-cp .env.example .env
+cp jarvis/.env.example jarvis/.env
+cp obeissant/.env.example obeissant/.env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
 The service listens on `http://localhost:8080` by default.
 
-### Option B: Node directly
+### Option B: Node directly (Jarvis only)
 
 ```bash
+cd jarvis
 npm install
 cp .env.example .env
 npm run dev
@@ -61,7 +63,7 @@ docker build \
   --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   -t ghcr.io/<user>/jarvis:0.1.0 \
   -t ghcr.io/<user>/jarvis:latest \
-  .
+  ./jarvis
 ```
 
 3. Push:
@@ -88,10 +90,14 @@ sudo mkdir -p /opt/naas/logs/jarvis
 cd /opt/naas/stacks/jarvis
 ```
 
-Copy these files into `/opt/naas/stacks/jarvis`:
+Deploy by cloning (recommended) so the `jarvis/` and `obeissant/` folders exist:
 
-- `docker-compose.prod.yml`
-- `.env`
+```bash
+git clone https://github.com/<user>/jarvis.git /opt/naas/stacks/jarvis
+cd /opt/naas/stacks/jarvis
+cp jarvis/.env.example jarvis/.env
+cp obeissant/.env.example obeissant/.env
+```
 
 Edit `docker-compose.prod.yml` and set the image to your published tag:
 

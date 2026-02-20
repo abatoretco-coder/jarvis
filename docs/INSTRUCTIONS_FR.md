@@ -3,7 +3,7 @@
 Ce dépôt contient :
 
 - **Jarvis (VM300)** : le “cerveau” (texte → intentions → actions codifiées)
-- **VM400 Orchestrator (VM400)** : la “couche d’exécution” (voix/téléphone → Jarvis → connecteurs Gmail/Android/HA)
+- **Obéissant / VM400 Orchestrator (VM400)** : la “couche d’exécution” (voix/téléphone → Jarvis → connecteurs Gmail/Android/HA)
 
 ## 0) Pré-requis
 
@@ -33,7 +33,9 @@ Ce dépôt contient :
 ## 2) Lancer Jarvis en local (PC)
 
 ```bash
-cp .env.example .env
+cp jarvis/.env.example jarvis/.env
+cp obeissant/.env.example obeissant/.env
+cd jarvis
 # Renseigne HA_BASE_URL et HA_TOKEN (ou laisse si tu testes sans HA)
 npm install
 npm run dev
@@ -58,9 +60,12 @@ Chemins recommandés :
 
 ```bash
 sudo mkdir -p /opt/naas/stacks/jarvis
+git clone https://github.com/<user>/jarvis.git /opt/naas/stacks/jarvis
 cd /opt/naas/stacks/jarvis
 
-# Copier ici: docker-compose.prod.yml + .env
+cp jarvis/.env.example jarvis/.env
+cp obeissant/.env.example obeissant/.env
+
 docker compose -f docker-compose.prod.yml up -d
 ```
 
@@ -86,7 +91,7 @@ curl -s http://<VM300_IP>:8080/v1/command \
 
 ## 4) Déployer VM400 orchestrator (Gmail + Android)
 
-Le dossier est : `vm400-orchestrator/`.
+Le dossier est : `obeissant/`.
 
 Sur VM400 :
 
@@ -95,15 +100,15 @@ sudo mkdir -p /opt/naas/stacks/jarvis-vm400
 sudo mkdir -p /opt/naas/appdata/jarvis-vm400
 cd /opt/naas/stacks/jarvis-vm400
 
-# Copier le dossier vm400-orchestrator/ ici
-cp vm400-orchestrator/.env.example vm400-orchestrator/.env
+# Copier le dossier obeissant/ ici
+cp obeissant/.env.example obeissant/.env
 
-docker compose -f vm400-orchestrator/docker-compose.prod.yml up -d --build
+docker compose -f obeissant/docker-compose.prod.yml up -d --build
 ```
 
 ### 4.1 Config VM400 → Jarvis
 
-Dans `vm400-orchestrator/.env` :
+Dans `obeissant/.env` :
 
 ```dotenv
 JARVIS_BASE_URL=http://<VM300_IP>:8080
@@ -129,7 +134,7 @@ Résumé des étapes :
 2. Activer l’API **Gmail API**
 3. Créer des identifiants **OAuth Client ID**
 4. Générer un **refresh token** (flux OAuth)
-5. Mettre dans `vm400-orchestrator/.env` :
+5. Mettre dans `obeissant/.env` :
 
 ```dotenv
 GMAIL_CLIENT_ID=...
@@ -138,7 +143,7 @@ GMAIL_REFRESH_TOKEN=...
 GMAIL_USER_EMAIL=jai@free.fr
 ```
 
-Note : le fichier `vm400-orchestrator/src/gmail.ts` lit le contenu en `metadata` (From/Subject + snippet), ce qui suffit pour un résumé.
+Note : le fichier `obeissant/src/gmail.ts` lit le contenu en `metadata` (From/Subject + snippet), ce qui suffit pour un résumé.
 
 ## 5) Android → SMS (webhook)
 

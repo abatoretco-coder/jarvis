@@ -5,7 +5,11 @@ import { loadEnv } from './env';
 import { readLatestEmails } from './gmail';
 import { appendMessage, readLatest } from './inboxStore';
 import { callJarvisPlan } from './jarvisClient';
-import type { InboxMessage } from './types';
+import type { ConnectorRequestAction, InboxMessage, JarvisAction } from './types';
+
+function isConnectorRequestAction(action: JarvisAction): action is ConnectorRequestAction {
+  return action.type === 'connector.request';
+}
 
 const ingestSchema = z.object({
   text: z.string().min(1),
@@ -55,7 +59,7 @@ async function main() {
     const outputs: Array<Record<string, unknown>> = [];
 
     for (const action of jarvis.actions) {
-      if (action.type === 'connector.request' && action.connector === 'email') {
+      if (isConnectorRequestAction(action) && action.connector === 'email') {
         const limit = typeof action.params?.limit === 'number' ? action.params.limit : 5;
         const emails = await readLatestEmails(env, limit);
         outputs.push({
@@ -68,7 +72,7 @@ async function main() {
       }
 
       if (
-        action.type === 'connector.request' &&
+        isConnectorRequestAction(action) &&
         (action.connector === 'sms' ||
           action.connector === 'whatsapp' ||
           action.connector === 'messenger')
