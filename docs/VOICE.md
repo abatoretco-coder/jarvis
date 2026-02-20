@@ -85,3 +85,7 @@ Jarvis should respond with the normal command router response.
 
 - Jarvis `/health` stays unauthenticated for monitoring.
 - If you want Jarvis to do STT itself (audio upload → transcription → route), say so and I’ll add an optional STT sidecar container + endpoint.
+
+## Satellites (Raspberry Pi / Bluetooth)
+
+See [docs/VOICE_SATELLITES.md](VOICE_SATELLITES.md) for flexible external device setups.
