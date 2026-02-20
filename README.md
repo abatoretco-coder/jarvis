@@ -114,4 +114,6 @@ Multi-VM (VM300 Jarvis + VM400 Home Assistant): see [docs/MULTI_VM.md](docs/MULT
 
 VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
 
+French step-by-step: see [docs/INSTRUCTIONS_FR.md](docs/INSTRUCTIONS_FR.md).
+
 Optional VM400 orchestrator reference service: see `vm400-orchestrator/`.
