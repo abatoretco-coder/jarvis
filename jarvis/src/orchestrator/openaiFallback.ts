@@ -15,9 +15,8 @@ function getConversationId(input: SkillInput, ctx: SkillRunContext): string {
     typeof c?.sessionId === 'string' ? c.sessionId : undefined,
     typeof c?.deviceId === 'string' ? c.deviceId : undefined,
     typeof c?.userId === 'string' ? c.userId : undefined,
-    ctx.requestId,
   ];
-  return candidates.find((v) => typeof v === 'string' && v.trim()) ?? ctx.requestId;
+  return candidates.find((v) => typeof v === 'string' && v.trim()) ?? 'default';
 }
 
 function buildSystemPrompt(): string {
