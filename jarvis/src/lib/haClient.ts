@@ -25,7 +25,7 @@ export class HomeAssistantClient {
 
     const body: Record<string, unknown> = {
       ...(input.serviceData ?? {}),
-      ...(input.target ? { target: input.target } : {}),
+      ...(input.target ?? {}),
     };
 
     try {
