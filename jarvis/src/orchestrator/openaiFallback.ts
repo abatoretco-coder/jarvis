@@ -2,11 +2,45 @@ import type { Env } from '../config/env';
 import type { Skill, SkillInput, SkillRunContext } from '../skills/types';
 import type { RoutedSkillResult } from '../skills/router';
 
+import { z } from 'zod';
+
 import { MemoryStore } from './memoryStore';
 
 type OpenAiDirective =
   | { type: 'chat'; text: string }
-  | { type: 'command'; text: string };
+  | { type: 'command'; text: string }
+  | {
+      type: 'actions';
+      intent: string;
+      message?: string;
+      actions: import('../actions/types').JarvisAction[];
+    };
+
+const actionSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('home_assistant.service_call'), domain: z.string().min(1), service: z.string().min(1), target: z.record(z.unknown()).optional(), serviceData: z.record(z.unknown()).optional() }),
+  z.object({ type: z.literal('todo.add_task'), title: z.string().min(1), list: z.string().min(1).optional(), dueAt: z.string().min(1).optional(), remindAt: z.string().min(1).optional() }),
+  z.object({ type: z.literal('music.play_request'), query: z.string().min(1) }),
+  z.object({ type: z.literal('robot.start'), robot: z.string().min(1), mode: z.string().min(1).optional() }),
+  z.object({ type: z.literal('timer.requested'), seconds: z.number().int().positive(), requestedAt: z.string().min(1) }),
+  z.object({ type: z.literal('weather.query'), entityId: z.string().min(1).optional(), when: z.enum(['now', 'today', 'tomorrow', 'week']) }),
+  z.object({
+    type: z.literal('connector.request'),
+    connector: z.enum(['email', 'sms', 'whatsapp', 'messenger', 'todo']),
+    operation: z.enum(['read_latest', 'summarize', 'search', 'list', 'create']),
+    params: z.record(z.unknown()).optional(),
+  }),
+]);
+
+const directiveSchema = z.union([
+  z.object({ type: z.literal('chat'), text: z.string().min(1) }),
+  z.object({ type: z.literal('command'), text: z.string().min(1) }),
+  z.object({
+    type: z.literal('actions'),
+    intent: z.string().min(1),
+    message: z.string().min(1).optional(),
+    actions: z.array(actionSchema).default([]),
+  }),
+]);
 
 function getConversationId(input: SkillInput, ctx: SkillRunContext): string {
   const c = input.context;
@@ -22,13 +56,26 @@ function getConversationId(input: SkillInput, ctx: SkillRunContext): string {
 function buildSystemPrompt(): string {
   return [
     'You are Jarvis, an intent router for a smart-home assistant (FR/EN).',
-    'Your job: decide whether the user message is (A) conversation (answer normally), or (B) a command that should be rewritten into Jarvis command syntax.',
+    'Your job: decide whether the user message is (A) conversation (answer normally), or (B) a command that maps to ONE OR MORE actions from the catalog below (preferred), or (C) a command that should be rewritten into Jarvis command syntax.',
     '',
-    'Return ONLY valid JSON with shape:',
-    '{"type":"chat"|"command","text":"..."}',
+    'Return ONLY valid JSON matching ONE of these shapes:',
+    '1) {"type":"actions","intent":"...","message":"...","actions":[...]}',
+    '2) {"type":"command","text":"..."}',
+    '3) {"type":"chat","text":"..."}',
     '',
-    'If the user is asking to control devices / home automation, prefer type="command".',
+    'If the user is asking to control devices / home automation, prefer type="actions" when possible.',
     'If the user is chatting, asking questions, or needs an explanation, use type="chat".',
+    'If none of the catalog actions can be produced safely, use type="command" (rewrite to an existing Jarvis command), or type="chat" if it is not an actionable request.',
+    '',
+    'Action catalog (choose from these; do NOT invent other action types):',
+    '- home_assistant.service_call {domain, service, target?, serviceData?}',
+    '- lights should usually be expressed as a command (so the deterministic lights skill resolves aliases).',
+    '- todo.add_task {title, list?, dueAt?, remindAt?}',
+    '- timer.requested {seconds, requestedAt} (use requestedAt=now ISO)',
+    '- music.play_request {query}',
+    '- weather.query {when: now|today|tomorrow|week, entityId?}',
+    '- robot.start {robot, mode?} (NOTE: robot is confirmation-gated later; keep it simple)',
+    '- connector.request {connector: email|sms|whatsapp|messenger|todo, operation?, params?}',
     '',
     'Supported command patterns (examples). Prefer the simplest existing pattern:',
     '- ping',
@@ -46,11 +93,13 @@ function buildSystemPrompt(): string {
     '- ha: <domain>.<service> entity_id=<entity_id> key=value ...',
     '',
     'Rules:',
+    '- If you output type="actions", actions must be directly usable without guessing missing IDs.',
     '- If you output type="command", keep it short and directly executable.',
     '- Never invent entity_id/area_id/device_id values; only use ha: when the user already gave a specific entity_id/area_id/device_id.',
     '- If the user mentions a device by name but provides no explicit target id, avoid ha:. Prefer skill commands like lights/todo/timer/inbox/music/robot.',
     '- Do not add extra words around the command (no quotes, no explanations).',
     '- Language: match the user language in chat mode; command mode uses Jarvis command syntax.',
+    '- If the request is unsafe/ambiguous (e.g., could start a robot in the wrong area), prefer asking a clarification in chat mode.',
   ].join('\n');
 }
 
@@ -93,16 +142,24 @@ async function openAiChatJson(env: Env, messages: { role: 'system' | 'user' | 'a
 }
 
 function parseDirective(raw: string): OpenAiDirective {
-  try {
-    const parsed = JSON.parse(raw) as any;
-    if (parsed?.type === 'command' && typeof parsed.text === 'string' && parsed.text.trim()) {
-      return { type: 'command', text: parsed.text.trim() };
+  const parsed = (() => {
+    try {
+      return JSON.parse(raw) as unknown;
+    } catch {
+      return undefined;
     }
-    if (parsed?.type === 'chat' && typeof parsed.text === 'string' && parsed.text.trim()) {
-      return { type: 'chat', text: parsed.text.trim() };
-    }
-  } catch {
-    // fall through
+  })();
+
+  const r = directiveSchema.safeParse(parsed);
+  if (r.success) {
+    if (r.data.type === 'command') return { type: 'command', text: r.data.text.trim() };
+    if (r.data.type === 'chat') return { type: 'chat', text: r.data.text.trim() };
+    return {
+      type: 'actions',
+      intent: r.data.intent.trim(),
+      message: r.data.message?.trim(),
+      actions: r.data.actions,
+    };
   }
 
   // Fallback: treat raw as chat.
@@ -136,7 +193,16 @@ export async function maybeHandleOpenAiFallback(input: SkillInput, ctx: SkillRun
   await store.append(conversationId, { ts: ctx.now.toISOString(), role: 'user', content: input.text }, ctx.now);
   await store.append(
     conversationId,
-    { ts: ctx.now.toISOString(), role: 'assistant', content: directive.type === 'command' ? `CMD: ${directive.text}` : directive.text },
+    {
+      ts: ctx.now.toISOString(),
+      role: 'assistant',
+      content:
+        directive.type === 'command'
+          ? `CMD: ${directive.text}`
+          : directive.type === 'actions'
+            ? `ACT: ${JSON.stringify({ intent: directive.intent, actions: directive.actions })}`
+            : directive.text,
+    },
     ctx.now
   );
 
@@ -156,6 +222,17 @@ export async function llmResultToRouted(
       intent: 'chat',
       result: { message: directive.text },
       actions: [],
+    };
+  }
+
+  if (directive.type === 'actions') {
+    return {
+      skill: 'llm',
+      intent: `llm.actions.${directive.intent}`,
+      result: {
+        message: directive.message ?? 'OK.',
+      },
+      actions: directive.actions,
     };
   }
 
