@@ -1,6 +1,9 @@
 services:
   jarvis:
     image: ghcr.io/abatoretco-coder/jarvis:main
+    build:
+      context: .
+      target: runtime
     ports:
       - '8080:8080'
     env_file:

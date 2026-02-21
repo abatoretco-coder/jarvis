@@ -142,10 +142,9 @@ switch ($Command) {
       "if [ ! -d $RepoPath/.git ]; then git clone https://github.com/abatoretco-coder/jarvis.git $RepoPath; fi",
       "cd $RepoPath",
       'git fetch --all --prune',
+      'git reset --hard origin/main',
       'git pull --ff-only',
       "test -f .env || (echo 'Missing .env (run push-env first)'; exit 2)",
-      # Repair placeholder compose if present (older repo versions)
-      "if grep -q '<user>' docker-compose.prod.yml 2>/dev/null; then cat > docker-compose.prod.yml <<'YAML'\nservices:\n  jarvis:\n    build:\n      context: .\n    ports:\n      - '8080:8080'\n    env_file:\n      - .env\n    volumes:\n      - /opt/naas/appdata/jarvis-vm300:/app/data\n    restart: unless-stopped\nYAML\nfi",
       'docker compose -f docker-compose.prod.yml up -d --build'
     ) -join "`n"
 
