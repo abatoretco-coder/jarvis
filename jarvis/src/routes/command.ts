@@ -39,6 +39,7 @@ export function commandRoutes(skills: Skill[]): FastifyPluginAsync {
         },
         ha: {
           callService: app.ha.callService.bind(app.ha),
+          getServices: app.ha.getServices.bind(app.ha),
         },
       };
 

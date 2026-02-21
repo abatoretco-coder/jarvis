@@ -15,6 +15,7 @@ export type SkillRunContext = {
       serviceData?: Record<string, unknown>;
       target?: Record<string, unknown>;
     }) => Promise<{ status: number; data: unknown }>;
+    getServices?: () => Promise<{ status: number; data: unknown }>;
   };
 };
 

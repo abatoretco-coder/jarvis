@@ -16,6 +16,15 @@ type OpenAiDirective =
       actions: import('../actions/types').JarvisAction[];
     };
 
+type SelectServiceDirective = {
+  type: 'select_service';
+  domain: string;
+  service: string;
+  reason?: string;
+};
+
+type AnyDirective = OpenAiDirective | SelectServiceDirective;
+
 const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('home_assistant.service_call'), domain: z.string().min(1), service: z.string().min(1), target: z.record(z.unknown()).optional(), serviceData: z.record(z.unknown()).optional() }),
   z.object({ type: z.literal('todo.add_task'), title: z.string().min(1), list: z.string().min(1).optional(), dueAt: z.string().min(1).optional(), remindAt: z.string().min(1).optional() }),
@@ -41,7 +50,80 @@ const directiveSchema = z.union([
     message: z.string().min(1).optional(),
     actions: z.array(actionSchema).default([]),
   }),
+  z.object({
+    type: z.literal('select_service'),
+    domain: z.string().min(1),
+    service: z.string().min(1),
+    reason: z.string().min(1).optional(),
+  }),
 ]);
+
+type HaServiceEntry = {
+  domain: string;
+  services: Record<
+    string,
+    {
+      name?: string;
+      description?: string;
+      fields?: Record<string, unknown>;
+      target?: Record<string, unknown>;
+    }
+  >;
+};
+
+let haServicesCache:
+  | { fetchedAtMs: number; data: HaServiceEntry[] }
+  | undefined;
+
+function formatHaServicesIndex(data: HaServiceEntry[]): string {
+  // Compact representation: one line per domain.
+  const lines: string[] = [];
+  for (const d of data) {
+    const services = Object.keys(d.services ?? {}).sort();
+    if (!services.length) continue;
+    lines.push(`${d.domain}: ${services.join(', ')}`);
+  }
+  return lines.join('\n');
+}
+
+function pickServiceSchema(data: HaServiceEntry[], domain: string, service: string) {
+  const d = data.find((x) => x.domain === domain);
+  const s = d?.services?.[service];
+  if (!d || !s) return undefined;
+  return {
+    domain,
+    service,
+    name: s.name,
+    description: s.description,
+    target: s.target,
+    fields: s.fields,
+  };
+}
+
+async function getHaServices(ctx: SkillRunContext, now: Date): Promise<HaServiceEntry[] | undefined> {
+  if (!ctx.ha.getServices) return undefined;
+  const ttlMs = 60_000;
+  if (haServicesCache && now.getTime() - haServicesCache.fetchedAtMs < ttlMs) return haServicesCache.data;
+
+  const resp = await ctx.ha.getServices();
+  if (resp.status < 200 || resp.status >= 300) return undefined;
+
+  const raw = resp.data;
+  if (!Array.isArray(raw)) return undefined;
+
+  const parsed: HaServiceEntry[] = [];
+  for (const item of raw) {
+    if (typeof item !== 'object' || item === null) continue;
+    const domain = (item as any).domain;
+    const services = (item as any).services;
+    if (typeof domain !== 'string' || !domain.trim()) continue;
+    if (typeof services !== 'object' || services === null || Array.isArray(services)) continue;
+    parsed.push({ domain, services: services as any });
+  }
+
+  haServicesCache = { fetchedAtMs: now.getTime(), data: parsed };
+  return parsed;
+}
 
 function getConversationId(input: SkillInput, ctx: SkillRunContext): string {
   const c = input.context;
@@ -103,6 +185,8 @@ function buildSystemPrompt(): string {
     '- Do not add extra words around the command (no quotes, no explanations).',
     '- Language: match the user language in chat mode; command mode uses Jarvis command syntax.',
     '- If the request is unsafe/ambiguous (e.g., could start a robot in the wrong area), prefer asking a clarification in chat mode.',
+    '- For Home Assistant: you may output home_assistant.service_call only if the user provided an explicit target id (entity_id/device_id/area_id) OR if the service clearly needs no target. If unsure, ask a clarification (chat).',
+    '- If you need the exact schema/fields for a Home Assistant service, respond with type="select_service" and the chosen {domain,service}.',
   ].join('\n');
 }
 
@@ -144,7 +228,7 @@ async function openAiChatJson(env: Env, messages: { role: 'system' | 'user' | 'a
   }
 }
 
-function parseDirective(raw: string): OpenAiDirective {
+function parseDirective(raw: string): AnyDirective {
   const parsed = (() => {
     try {
       return JSON.parse(raw) as unknown;
@@ -157,6 +241,14 @@ function parseDirective(raw: string): OpenAiDirective {
   if (r.success) {
     if (r.data.type === 'command') return { type: 'command', text: r.data.text.trim() };
     if (r.data.type === 'chat') return { type: 'chat', text: r.data.text.trim() };
+    if (r.data.type === 'select_service') {
+      return {
+        type: 'select_service',
+        domain: r.data.domain.trim(),
+        service: r.data.service.trim(),
+        reason: r.data.reason?.trim(),
+      };
+    }
     return {
       type: 'actions',
       intent: r.data.intent.trim(),
@@ -188,10 +280,61 @@ export async function maybeHandleOpenAiFallback(input: SkillInput, ctx: SkillRun
     messages.push({ role: m.role, content: m.content });
   }
 
-  messages.push({ role: 'user', content: input.text });
+  const haServices = await getHaServices(ctx, ctx.now);
+  if (haServices?.length) {
+    const index = formatHaServicesIndex(haServices);
+    messages.push({
+      role: 'user',
+      content: [
+        input.text,
+        '',
+        'Home Assistant services index (domain: services...):',
+        index,
+        '',
+        'If you need details for one specific service, return type="select_service".',
+      ].join('\n'),
+    });
+  } else {
+    messages.push({ role: 'user', content: input.text });
+  }
 
   const raw = await openAiChatJson(env, messages);
-  const directive = parseDirective(raw);
+  const directive1 = parseDirective(raw);
+
+  const directive: OpenAiDirective = await (async () => {
+    if (directive1.type !== 'select_service') return directive1;
+    if (!haServices?.length) {
+      return { type: 'chat', text: "Je peux essayer, mais je n'ai pas accès au catalogue Home Assistant. Peux-tu préciser ?" };
+    }
+
+    const schema = pickServiceSchema(haServices, directive1.domain, directive1.service);
+    if (!schema) {
+      return { type: 'chat', text: `Je ne trouve pas le service ${directive1.domain}.${directive1.service} dans Home Assistant.` };
+    }
+
+    const followup: { role: 'system' | 'user' | 'assistant'; content: string }[] = [
+      { role: 'system', content: buildSystemPrompt() },
+      ...history.map((m) => ({ role: m.role, content: m.content } as const)),
+      {
+        role: 'user',
+        content: [
+          input.text,
+          '',
+          'Selected Home Assistant service schema (JSON):',
+          JSON.stringify(schema),
+          '',
+          'Now respond with type="actions" (preferred), or type="command", or type="chat" if not actionable.',
+        ].join('\n'),
+      },
+    ];
+
+    const raw2 = await openAiChatJson(env, followup);
+    const d2 = parseDirective(raw2);
+    if (d2.type === 'select_service') {
+      return { type: 'chat', text: "Je ne peux pas enchaîner plus loin sans plus de détails (cible/paramètres)." };
+    }
+    return d2;
+  })();
 
   await store.append(conversationId, { ts: ctx.now.toISOString(), role: 'user', content: input.text }, ctx.now);
   await store.append(

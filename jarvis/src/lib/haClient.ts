@@ -18,24 +18,19 @@ export class HomeAssistantClient {
     this.timeoutMs = env.HA_TIMEOUT_MS;
   }
 
-  async callService(input: HomeAssistantServiceCall): Promise<{ status: number; data: unknown }> {
-    const url = `${this.baseUrl}/api/services/${encodeURIComponent(input.domain)}/${encodeURIComponent(input.service)}`;
+  private async request(path: string, init: { method: 'GET' | 'POST'; body?: unknown }): Promise<{ status: number; data: unknown }> {
+    const url = `${this.baseUrl}${path}`;
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
 
-    const body: Record<string, unknown> = {
-      ...(input.serviceData ?? {}),
-      ...(input.target ?? {}),
-    };
-
     try {
       const resp = await fetch(url, {
-        method: 'POST',
+        method: init.method,
         headers: {
           authorization: `Bearer ${this.token}`,
           'content-type': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
         signal: controller.signal,
       });
 
@@ -48,5 +43,21 @@ export class HomeAssistantClient {
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  async getServices(): Promise<{ status: number; data: unknown }> {
+    return this.request('/api/services', { method: 'GET' });
+  }
+
+  async callService(input: HomeAssistantServiceCall): Promise<{ status: number; data: unknown }> {
+    const body: Record<string, unknown> = {
+      ...(input.serviceData ?? {}),
+      ...(input.target ?? {}),
+    };
+
+    return this.request(
+      `/api/services/${encodeURIComponent(input.domain)}/${encodeURIComponent(input.service)}`,
+      { method: 'POST', body }
+    );
   }
 }
