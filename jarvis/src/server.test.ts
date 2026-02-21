@@ -28,7 +28,7 @@ const env = {
   HA_ENTITY_ALIASES_JSON: undefined,
 
   OPENAI_API_KEY: undefined,
-  OPENAI_MODEL: 'gpt-4o-mini',
+  OPENAI_MODEL: 'gpt-5-mini',
   OPENAI_BASE_URL: undefined,
   OPENAI_TIMEOUT_MS: 1000,
 

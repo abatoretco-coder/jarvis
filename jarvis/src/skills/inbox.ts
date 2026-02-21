@@ -27,6 +27,21 @@ function wantsSummarize(text: string): boolean {
   );
 }
 
+function wantsUnreadOnly(text: string): boolean {
+  const t = normalizeText(text);
+  return t.includes('non lu') || t.includes('non-lu') || t.includes('pas lu') || t.includes('unread');
+}
+
+function extractSearchQuery(text: string): string | undefined {
+  const t = text.trim();
+  const n = normalizeText(t);
+  // FR: "cherche dans mes mails <q>", "recherche mail <q>", "trouve email <q>"
+  const m = n.match(/\b(cherche|recherche|trouve|search|find)\b[^\n]*\b(mails?|mail|emails?|email|gmail|outlook)\b\s+(.+)$/);
+  if (!m) return undefined;
+  const q = t.slice(t.length - m[3].length).trim();
+  return q || undefined;
+}
+
 export const inboxSkill: Skill = {
   name: 'inbox',
   match: (input) => {
@@ -70,12 +85,19 @@ export const inboxSkill: Skill = {
     }
 
     const summarize = wantsSummarize(input.text);
+    const unreadOnly = wantsUnreadOnly(input.text);
+    const searchQuery = extractSearchQuery(input.text);
 
-    const operation = summarize ? 'summarize' : 'read_latest';
+    const t = normalizeText(input.text);
+    const wantsLatestOne = t.includes('dernier') || t.includes('derniere') || t.includes('last');
+
+    const operation = searchQuery ? 'search' : summarize ? 'summarize' : 'read_latest';
     const params: Record<string, unknown> = {
-      limit: 5,
+      limit: wantsLatestOne ? 1 : 5,
       includePreview: true,
       language: 'auto',
+      ...(unreadOnly ? { unreadOnly: true } : {}),
+      ...(searchQuery ? { query: searchQuery } : {}),
     };
 
     return {

@@ -35,7 +35,7 @@ const envSchema = z
 
     // Optional: LLM orchestrator (fallback only)
     OPENAI_API_KEY: optionalNonEmptyString,
-    OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+    OPENAI_MODEL: z.string().default('gpt-5-mini'),
     OPENAI_BASE_URL: z.string().url().optional(),
     OPENAI_TIMEOUT_MS: numberFromEnv.default('20000'),
 

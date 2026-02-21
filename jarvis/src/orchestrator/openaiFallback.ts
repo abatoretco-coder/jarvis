@@ -34,6 +34,8 @@ function buildSystemPrompt(): string {
     '- ping',
     '- time (FR: quelle heure est-il ? -> time)',
     '- todo: buy milk (FR: ajoute une tâche appeler le dentiste -> todo: appeler le dentiste)',
+    '- todo: call dentist due=2026-02-23T09:00 remind=2026-02-23T08:50 (FR: ajoute une tâche appeler le dentiste demain 9h avec rappel 8h50)',
+    '- liste mes tâches -> (command) todo list',
     '- timer 5 minutes (FR: mets un minuteur 5 minutes -> timer 5 minutes)',
     '- turn on kitchen light 40% (FR: allume la lumière cuisine 40%)',
     '- turn off kitchen light (FR: éteins la lumière cuisine)',

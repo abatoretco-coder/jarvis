@@ -10,6 +10,10 @@ export type TodoAddTaskAction = {
   type: 'todo.add_task';
   title: string;
   list?: string;
+  /** Optional due date/time ISO string, e.g. 2026-02-21T09:00:00+01:00 */
+  dueAt?: string;
+  /** Optional reminder date/time ISO string */
+  remindAt?: string;
 };
 
 export type MusicPlayRequestAction = {
@@ -29,9 +33,9 @@ export type TimerRequestedAction = {
   requestedAt: string;
 };
 
-export type ConnectorName = 'email' | 'whatsapp' | 'messenger' | 'sms';
+export type ConnectorName = 'email' | 'whatsapp' | 'messenger' | 'sms' | 'todo';
 
-export type ConnectorOperation = 'read_latest' | 'summarize' | 'search';
+export type ConnectorOperation = 'read_latest' | 'summarize' | 'search' | 'list' | 'create';
 
 export type ConnectorRequestAction = {
   type: 'connector.request';
