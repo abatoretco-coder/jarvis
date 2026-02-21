@@ -1,6 +1,7 @@
 import type { Skill } from './types';
 
 import { normalizeText } from '../lib/text';
+import { PendingStore } from '../orchestrator/pendingStore';
 
 export const robotSkill: Skill = {
   name: 'robot',
@@ -22,14 +23,48 @@ export const robotSkill: Skill = {
     const t = normalizeText(input.text);
     const robot = t.includes('vacuum') || t.includes('aspirateur') ? 'vacuum' : 'robot';
 
+    const c = input.context;
+    const conversationId =
+      (typeof c?.conversationId === 'string' && c.conversationId.trim())
+        ? c.conversationId.trim()
+        : (typeof (c as any)?.conversation_id === 'string' && String((c as any).conversation_id).trim())
+          ? String((c as any).conversation_id).trim()
+          : (typeof c?.sessionId === 'string' && c.sessionId.trim())
+            ? c.sessionId.trim()
+            : (typeof c?.deviceId === 'string' && c.deviceId.trim())
+              ? c.deviceId.trim()
+              : (typeof c?.userId === 'string' && c.userId.trim())
+                ? c.userId.trim()
+                : 'default';
+
+    const baseDir = ctx.env.memoryDir?.replace(/[\\/]+$/, '');
+    const store = baseDir ? new PendingStore(`${baseDir}/pending`, 2 * 60 * 1000) : undefined;
+
+    // Explicit commands bypass confirmation.
+    if (t.startsWith('robot:')) {
+      if (store) await store.clear(conversationId);
+      return {
+        intent: 'robot.start',
+        result: {
+          message: 'OK.',
+          requestId: ctx.requestId,
+        },
+        actions: [{ type: 'robot.start', robot, mode: 'auto' }],
+      };
+    }
+
+    // Natural language: ask for confirmation (safer default).
+    if (store) {
+      await store.set(conversationId, { type: 'robot.start', robot, mode: 'auto' }, ctx.now);
+    }
+
     return {
       intent: 'robot.plan',
       result: {
-        message: 'Robot skill is a stub in v0.1 (add your robot connector on VM400).',
+        message: "Je lance l'aspirateur ? Réponds 'oui' ou 'non'.",
         requestId: ctx.requestId,
-        hint: 'Later: map to HA vacuum.* services or vendor API',
       },
-      actions: [{ type: 'robot.start', robot, mode: 'auto' }],
+      actions: [],
     };
   },
 };

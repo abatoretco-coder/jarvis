@@ -109,17 +109,51 @@ describe('server', () => {
     await app.close();
   });
 
-  it('POST /v1/command routes time (FR)', async () => {
-    const app = await buildServer(env, [timeSkill]);
-    const res = await app.inject({
+  it('POST /v1/command routes robot with confirmation (FR)', async () => {
+    const app = await buildServer(env, [robotSkill]);
+
+    const res1 = await app.inject({
       method: 'POST',
       url: '/v1/command',
-      payload: { text: 'Quelle heure est-il ?' },
+      payload: { text: "Démarre l'aspirateur", context: { conversationId: 'c1' } },
     });
-    expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body.skill).toBe('time');
-    expect(body.intent).toBe('time.now');
+    expect(res1.statusCode).toBe(200);
+    const body1 = res1.json();
+    expect(body1.skill).toBe('robot');
+    expect(body1.actions.length).toBe(0);
+    expect(String(body1.result.message)).toContain('oui');
+
+    const res2 = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: 'non', context: { conversationId: 'c1' } },
+    });
+    expect(res2.statusCode).toBe(200);
+    const body2 = res2.json();
+    expect(body2.skill).toBe('confirm');
+    expect(body2.actions.length).toBe(0);
+
+    const res3 = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: "Démarre l'aspirateur", context: { conversationId: 'c2' } },
+    });
+    expect(res3.statusCode).toBe(200);
+    const body3 = res3.json();
+    expect(body3.skill).toBe('robot');
+    expect(body3.actions.length).toBe(0);
+
+    const res4 = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: 'oui', context: { conversationId: 'c2' } },
+    });
+    expect(res4.statusCode).toBe(200);
+    const body4 = res4.json();
+    expect(body4.skill).toBe('confirm');
+    expect(body4.actions.length).toBe(1);
+    expect(body4.actions[0].type).toBe('robot.start');
+
     await app.close();
   });
 
@@ -206,21 +240,6 @@ describe('server', () => {
     expect(body.actions.length).toBe(1);
     expect(body.actions[0].type).toBe('music.play_request');
     expect(String(body.actions[0].query).toLowerCase()).toContain('daft');
-    await app.close();
-  });
-
-  it('POST /v1/command routes robot (FR)', async () => {
-    const app = await buildServer(env, [robotSkill]);
-    const res = await app.inject({
-      method: 'POST',
-      url: '/v1/command',
-      payload: { text: "Démarre l'aspirateur" },
-    });
-    expect(res.statusCode).toBe(200);
-    const body = res.json();
-    expect(body.skill).toBe('robot');
-    expect(body.actions.length).toBe(1);
-    expect(body.actions[0].type).toBe('robot.start');
     await app.close();
   });
 

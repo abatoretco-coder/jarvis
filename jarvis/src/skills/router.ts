@@ -1,5 +1,9 @@
 import type { Skill, SkillInput, SkillRunContext } from './types';
 
+import { PendingStore } from '../orchestrator/pendingStore';
+
+import { normalizeText } from '../lib/text';
+
 export type RoutedSkillResult = {
   skill: string;
   intent: string;
@@ -12,6 +16,46 @@ export async function routeAndRun(
   input: SkillInput,
   ctx: SkillRunContext
 ): Promise<RoutedSkillResult> {
+  const t0 = normalizeText(input.text);
+  // Safety: keep confirmations strict to avoid accidental execution.
+  const isYes = t0 === 'oui';
+  const isNo = t0 === 'non' || t0 === 'annule' || t0 === 'stop';
+
+  const c = input.context;
+  const conversationId =
+    (typeof c?.conversationId === 'string' && c.conversationId.trim())
+      ? c.conversationId.trim()
+      : (typeof (c as any)?.conversation_id === 'string' && String((c as any).conversation_id).trim())
+        ? String((c as any).conversation_id).trim()
+        : (typeof c?.sessionId === 'string' && c.sessionId.trim())
+          ? c.sessionId.trim()
+          : (typeof c?.deviceId === 'string' && c.deviceId.trim())
+            ? c.deviceId.trim()
+            : (typeof c?.userId === 'string' && c.userId.trim())
+              ? c.userId.trim()
+              : 'default';
+
+  if ((isYes || isNo) && ctx.env.memoryDir) {
+    const baseDir = ctx.env.memoryDir.replace(/[\\/]+$/, '');
+    const store = new PendingStore(`${baseDir}/pending`, 2 * 60 * 1000);
+    const pending = isYes ? await store.consume(conversationId, ctx.now) : await store.get(conversationId, ctx.now);
+    if (pending) {
+      // Only confirm/cancel actions we explicitly gate behind confirmation.
+      if (pending.action.type !== 'robot.start') {
+        if (isNo) await store.clear(conversationId);
+        // Ignore and proceed with normal routing.
+      } else {
+      if (isNo) await store.clear(conversationId);
+      return {
+        skill: 'confirm',
+        intent: pending.action.type === 'robot.start' ? (isYes ? 'robot.confirmed' : 'robot.cancelled') : (isYes ? 'confirm.yes' : 'confirm.no'),
+        result: { message: isYes ? 'OK.' : "OK, j'annule." },
+        actions: isYes ? [pending.action] : [],
+      };
+      }
+    }
+  }
+
   let best: { skill: Skill; score: number; intent: string } | undefined;
 
   for (const skill of skills) {

@@ -6,6 +6,7 @@ export type SkillRunContext = {
   execute: boolean;
   env: {
     haEntityAliases?: Record<string, string>;
+    memoryDir?: string;
   };
   ha: {
     callService: (input: {

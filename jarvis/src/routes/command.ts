@@ -35,6 +35,7 @@ export function commandRoutes(skills: Skill[]): FastifyPluginAsync {
           haEntityAliases: app.env.HA_ENTITY_ALIASES_JSON
             ? (JSON.parse(app.env.HA_ENTITY_ALIASES_JSON) as Record<string, string>)
             : undefined,
+          memoryDir: app.env.MEMORY_DIR,
         },
         ha: {
           callService: app.ha.callService.bind(app.ha),
@@ -54,6 +55,7 @@ export function commandRoutes(skills: Skill[]): FastifyPluginAsync {
                     haEntityAliases: app.env.HA_ENTITY_ALIASES_JSON
                       ? (JSON.parse(app.env.HA_ENTITY_ALIASES_JSON) as Record<string, string>)
                       : undefined,
+                    memoryDir: app.env.MEMORY_DIR,
                   },
                   ha: {
                     callService: app.ha.callService.bind(app.ha),
@@ -70,6 +72,7 @@ export function commandRoutes(skills: Skill[]): FastifyPluginAsync {
                     haEntityAliases: app.env.HA_ENTITY_ALIASES_JSON
                       ? (JSON.parse(app.env.HA_ENTITY_ALIASES_JSON) as Record<string, string>)
                       : undefined,
+                    memoryDir: app.env.MEMORY_DIR,
                   },
                   ha: {
                     callService: app.ha.callService.bind(app.ha),
