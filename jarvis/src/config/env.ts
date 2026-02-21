@@ -12,6 +12,12 @@ const numberFromEnv = z
   .pipe(z.string().regex(/^\d+$/, 'must be an integer'))
   .transform((v) => Number(v));
 
+const optionalNonEmptyString = z.preprocess((v) => {
+  if (typeof v !== 'string') return v;
+  const trimmed = v.trim();
+  return trimmed ? trimmed : undefined;
+}, z.string().min(1).optional());
+
 const envSchema = z
   .object({
     PORT: numberFromEnv.default('8080'),
@@ -26,6 +32,17 @@ const envSchema = z
     HA_TOKEN: z.string().min(1),
     HA_TIMEOUT_MS: numberFromEnv.default('10000'),
     HA_ENTITY_ALIASES_JSON: z.string().optional(),
+
+    // Optional: LLM orchestrator (fallback only)
+    OPENAI_API_KEY: optionalNonEmptyString,
+    OPENAI_MODEL: z.string().default('gpt-4o-mini'),
+    OPENAI_BASE_URL: z.string().url().optional(),
+    OPENAI_TIMEOUT_MS: numberFromEnv.default('20000'),
+
+    // Conversation memory (24h sliding window)
+    MEMORY_DIR: z.string().default('/app/data/memory'),
+    MEMORY_TTL_HOURS: numberFromEnv.default('24'),
+    MEMORY_MAX_MESSAGES: numberFromEnv.default('40'),
     BUILD_SHA: z.string().optional(),
     BUILD_TIME: z.string().optional(),
   })
@@ -70,6 +87,6 @@ export function loadEnv(rawEnv: NodeJS.ProcessEnv = process.env): Env {
 }
 
 export function envForLogging(env: Env) {
-  const { HA_TOKEN: _haToken, API_KEY: _apiKey, ...rest } = env;
+  const { HA_TOKEN: _haToken, API_KEY: _apiKey, OPENAI_API_KEY: _openAiKey, ...rest } = env;
   return rest;
 }

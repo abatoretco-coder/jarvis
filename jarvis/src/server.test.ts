@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import os from 'node:os';
+import path from 'node:path';
 
 import type { Env } from './config/env';
 import { buildServer } from './server';
@@ -20,6 +22,15 @@ const env = {
   HA_TOKEN: 'test-token',
   HA_TIMEOUT_MS: 1000,
   HA_ENTITY_ALIASES_JSON: undefined,
+
+  OPENAI_API_KEY: undefined,
+  OPENAI_MODEL: 'gpt-4o-mini',
+  OPENAI_BASE_URL: undefined,
+  OPENAI_TIMEOUT_MS: 1000,
+
+  MEMORY_DIR: path.join(os.tmpdir(), 'jarvis-test-memory'),
+  MEMORY_TTL_HOURS: 24,
+  MEMORY_MAX_MESSAGES: 40,
   BUILD_SHA: undefined,
   BUILD_TIME: undefined,
 } satisfies Env;
@@ -108,6 +119,46 @@ describe('server', () => {
     expect(body.actions[0].connector).toBe('email');
     expect(body.mode).toBe('plan');
     await app.close();
+  });
+
+  it('POST /v1/command uses OpenAI fallback when no skill matches', async () => {
+    const originalFetch = globalThis.fetch;
+
+    const mockFetch: typeof fetch = async (_input, _init) => {
+      // Minimal OpenAI chat.completions-like payload.
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({ type: 'command', text: 'ping' }),
+              },
+            },
+          ],
+        }),
+        {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        }
+      );
+    };
+
+    globalThis.fetch = mockFetch;
+
+    const app = await buildServer({ ...env, OPENAI_API_KEY: 'k' }, [pingSkill]);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: 'hello there' },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.skill).toBe('ping');
+    expect(String(body.intent)).toContain('llm.rewrite');
+
+    await app.close();
+    globalThis.fetch = originalFetch;
   });
 
   it('API key: /health does not require key', async () => {

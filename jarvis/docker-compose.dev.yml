@@ -12,6 +12,7 @@ services:
     volumes:
       - ./:/app
       - jarvis_node_modules:/app/node_modules
+      - ./data:/app/data
     restart: unless-stopped
 
 volumes:

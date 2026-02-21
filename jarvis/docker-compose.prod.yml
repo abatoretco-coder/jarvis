@@ -5,4 +5,6 @@ services:
       - '8080:8080'
     env_file:
       - .env
+    volumes:
+      - /opt/naas/appdata/jarvis-vm300:/app/data
     restart: unless-stopped
