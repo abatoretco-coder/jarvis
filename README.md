@@ -1,11 +1,11 @@
 # Jarvis stack (v0.1)
 
-Monorepo layout:
+Repo layout:
 
 - `jarvis/`: VM300 brain (text → codified actions)
 - `obeissant/`: (optional) VM400 execution layer (connectors like Gmail + Android SMS)
 
-Stack compose includes `homeassistant` as a container service.
+Home Assistant est dans un dépôt séparé : https://github.com/abatoretco-coder/home-assistant
 
 ## Quickstart (local dev via Docker)
 
@@ -32,8 +32,6 @@ docker compose -f docker-compose.dev.yml up --build
 ```bash
 curl -s http://localhost:8080/health | jq
 ```
-
-Home Assistant UI will be on `http://localhost:8123`.
 
 To also run VM400 connectors (optional):
 
@@ -135,6 +133,6 @@ VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
 
 French step-by-step: see [docs/INSTRUCTIONS_FR.md](docs/INSTRUCTIONS_FR.md).
 
-Home Assistant controllers (Plex/Hue/Xiaomi/Spotify): see [docs/HOME_ASSISTANT_CONTROLLERS.md](docs/HOME_ASSISTANT_CONTROLLERS.md).
+Home Assistant controllers (Plex/Hue/Xiaomi/Spotify): see https://github.com/abatoretco-coder/home-assistant
 
 VM400 orchestrator reference service: see `obeissant/`.

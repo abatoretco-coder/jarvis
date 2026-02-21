@@ -5,7 +5,7 @@ const tag = process.env.TAG;
 
 if (!image || !tag) {
   console.error(
-    'Missing IMAGE or TAG env vars. Example: IMAGE=ghcr.io/<user>/jarvis TAG=0.1.0 npm run docker:push'
+    'Missing IMAGE or TAG env vars. Example: IMAGE=ghcr.io/abatoretco-coder/jarvis TAG=0.1.0 npm run docker:push'
   );
   process.exit(2);
 }

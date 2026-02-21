@@ -1,6 +1,6 @@
 services:
   jarvis:
-    image: ghcr.io/<user>/jarvis:<tag>
+    image: ghcr.io/abatoretco-coder/jarvis:main
     build:
       context: ./jarvis
     ports:
@@ -19,12 +19,4 @@ services:
       - ./obeissant/.env
     volumes:
       - /opt/naas/appdata/jarvis-vm400:/app/data
-    restart: unless-stopped
-
-  homeassistant:
-    image: ghcr.io/home-assistant/home-assistant:stable
-    ports:
-      - '8123:8123'
-    volumes:
-      - /opt/naas/appdata/homeassistant:/config
     restart: unless-stopped

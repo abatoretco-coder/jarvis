@@ -9,7 +9,7 @@ cp jarvis/.env.example jarvis/.env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Home Assistant will be available at `http://localhost:8123`.
+Home Assistant est séparé (repo dédié). En local, si tu l’exécutes sur la même machine via Docker, pense à configurer `HA_BASE_URL` pour que **Jarvis dans son conteneur** atteigne HA (ex: Docker Desktop: `http://host.docker.internal:8123`).
 
 Optional (also run VM400 connectors):
 
@@ -38,7 +38,7 @@ Jarvis is configured entirely through environment variables (no secrets in git).
 Jarvis + Home Assistant are designed to be configurable **without editing code**:
 
 - Jarvis: edit `jarvis/.env` then restart the container.
-- Home Assistant: configure integrations from the UI; settings persist in `/config` (the mounted volume).
+- Home Assistant: repo séparé (config persistée dans `/config`).
 
 Typical workflow (VM300/prod):
 
@@ -56,8 +56,7 @@ docker compose -f docker-compose.prod.yml restart jarvis
 
 Home Assistant persistence:
 
-- Config lives in `/opt/naas/appdata/homeassistant/` (because it is mounted to `/config`)
-- After changing integrations in the UI, no Docker rebuild is needed
+- Voir le dépôt Home Assistant: https://github.com/abatoretco-coder/home-assistant
 
 
 Required:
@@ -87,7 +86,7 @@ If you use GitHub Actions, this repo includes a workflow that publishes to GHCR:
 1. Authenticate Docker to GHCR:
 
 ```bash
-echo $GITHUB_TOKEN | docker login ghcr.io -u <user> --password-stdin
+echo $GITHUB_TOKEN | docker login ghcr.io -u abatoretco-coder --password-stdin
 ```
 
 2. Build (with metadata):
@@ -96,16 +95,16 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u <user> --password-stdin
 docker build \
   --build-arg BUILD_SHA=$(git rev-parse --short HEAD) \
   --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-  -t ghcr.io/<user>/jarvis:0.1.0 \
-  -t ghcr.io/<user>/jarvis:latest \
+  -t ghcr.io/abatoretco-coder/jarvis:0.1.0 \
+  -t ghcr.io/abatoretco-coder/jarvis:latest \
   ./jarvis
 ```
 
 3. Push:
 
 ```bash
-docker push ghcr.io/<user>/jarvis:0.1.0
-docker push ghcr.io/<user>/jarvis:latest
+docker push ghcr.io/abatoretco-coder/jarvis:0.1.0
+docker push ghcr.io/abatoretco-coder/jarvis:latest
 ```
 
 ## Deploy on VM300 (Proxmox) under /opt/naas/stacks/jarvis
@@ -128,7 +127,7 @@ cd /opt/naas/stacks/jarvis
 Deploy by cloning (recommended):
 
 ```bash
-git clone https://github.com/<user>/jarvis.git /opt/naas/stacks/jarvis
+git clone https://github.com/abatoretco-coder/jarvis.git /opt/naas/stacks/jarvis
 cd /opt/naas/stacks/jarvis
 cp jarvis/.env.example jarvis/.env
 ```
@@ -142,7 +141,7 @@ cp obeissant/.env.example obeissant/.env
 Edit `docker-compose.prod.yml` and set the image to your published tag:
 
 ```yaml
-image: ghcr.io/<user>/jarvis:0.1.0
+image: ghcr.io/abatoretco-coder/jarvis:0.1.0
 ```
 
 Start:

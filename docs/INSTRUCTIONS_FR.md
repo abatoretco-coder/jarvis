@@ -65,7 +65,7 @@ Chemins recommandés :
 
 ```bash
 sudo mkdir -p /opt/naas/stacks/jarvis
-git clone https://github.com/<user>/jarvis.git /opt/naas/stacks/jarvis
+git clone https://github.com/abatoretco-coder/jarvis.git /opt/naas/stacks/jarvis
 cd /opt/naas/stacks/jarvis
 
 cp jarvis/.env.example jarvis/.env

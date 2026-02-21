@@ -1,6 +1,6 @@
 services:
   jarvis:
-    image: ghcr.io/<user>/jarvis:<tag>
+    image: ghcr.io/abatoretco-coder/jarvis:main
     ports:
       - '8080:8080'
     env_file:

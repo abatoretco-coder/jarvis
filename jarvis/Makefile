@@ -1,4 +1,4 @@
-IMAGE ?= ghcr.io/<user>/jarvis
+IMAGE ?= ghcr.io/abatoretco-coder/jarvis
 TAG ?= dev
 
 .PHONY: dev build test lint format docker-build docker-push
