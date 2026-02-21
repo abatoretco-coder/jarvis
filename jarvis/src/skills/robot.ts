@@ -1,16 +1,25 @@
 import type { Skill } from './types';
 
+import { normalizeText } from '../lib/text';
+
 export const robotSkill: Skill = {
   name: 'robot',
   match: (input) => {
-    const t = input.text.trim().toLowerCase();
+    const t = normalizeText(input.text);
     if (t.startsWith('robot:')) return { score: 0.8, intent: 'robot.start' };
-    if (t.includes('robot') || t.includes('aspirateur') || t.includes('vacuum'))
+    if (
+      t.includes('robot') ||
+      t.includes('aspirateur') ||
+      t.includes('vacuum') ||
+      t.includes('nettoie') ||
+      t.includes('demarre') ||
+      t.includes('lance')
+    )
       return { score: 0.4, intent: 'robot.plan' };
     return { score: 0 };
   },
   run: async (input, ctx) => {
-    const t = input.text.trim().toLowerCase();
+    const t = normalizeText(input.text);
     const robot = t.includes('vacuum') || t.includes('aspirateur') ? 'vacuum' : 'robot';
 
     return {

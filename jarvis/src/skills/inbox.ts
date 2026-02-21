@@ -1,12 +1,10 @@
 import type { ConnectorName } from '../actions/types';
 import type { Skill } from './types';
 
-function normalize(s: string): string {
-  return s.toLowerCase().replace(/[’']/g, "'").replace(/\s+/g, ' ').trim();
-}
+import { normalizeText } from '../lib/text';
 
 function detectConnector(text: string): ConnectorName | undefined {
-  const t = normalize(text);
+  const t = normalizeText(text);
   if (t.includes('whatsapp') || t.includes("what'sapp")) return 'whatsapp';
   if (t.includes('messenger') || t.includes('facebook messenger')) return 'messenger';
   if (t.includes('sms') || t.includes('texto') || t.includes('textos')) return 'sms';
@@ -23,9 +21,9 @@ function detectConnector(text: string): ConnectorName | undefined {
 }
 
 function wantsSummarize(text: string): boolean {
-  const t = normalize(text);
+  const t = normalizeText(text);
   return (
-    t.includes('résume') || t.includes('resume') || t.includes('summary') || t.includes('summarize')
+    t.includes('resume') || t.includes('summary') || t.includes('summarize')
   );
 }
 
@@ -35,8 +33,20 @@ export const inboxSkill: Skill = {
     const connector = detectConnector(input.text);
     if (!connector) return { score: 0 };
 
-    const t = normalize(input.text);
-    if (t.includes('lis') || t.includes('read') || t.includes('check') || t.includes('latest')) {
+    const t = normalizeText(input.text);
+    if (
+      t.includes('lis') ||
+      t.includes('lire') ||
+      t.includes('read') ||
+      t.includes('check') ||
+      t.includes('latest') ||
+      t.includes('dernier') ||
+      t.includes('derniers') ||
+      t.includes('nouveau') ||
+      t.includes('nouveaux') ||
+      t.includes('recent') ||
+      t.includes('recents')
+    ) {
       return { score: 0.7, intent: `${connector}.read_latest` };
     }
 

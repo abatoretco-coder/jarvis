@@ -31,8 +31,17 @@ export async function routeAndRun(
       skill: 'fallback',
       intent: 'unknown',
       result: {
-        message: "I didn't recognize that command.",
-        hint: 'Try: ping | todo: buy milk | turn on kitchen light 40% | ha: <domain>.<service> entity_id=<id> | read my emails | play music <query>',
+        message: "Je n'ai pas reconnu cette commande.",
+        hint: [
+          'Exemples:',
+          '- ping',
+          '- time (ou: quelle heure est-il ?)',
+          '- todo: acheter du lait (ou: ajoute une tâche appeler le dentiste)',
+          '- allume la lumière cuisine 40%',
+          '- ha: <domain>.<service> entity_id=<id> key=value ...',
+          '- lis mes emails / résume mes messages whatsapp',
+          '- joue daft punk (ou: play music <query>)',
+        ].join('\n'),
       },
       actions: [],
     };

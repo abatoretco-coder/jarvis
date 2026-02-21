@@ -1,15 +1,17 @@
 import type { Skill } from './types';
 
+import { normalizeText } from '../lib/text';
+
 function parseDurationSeconds(text: string): number | undefined {
-  const m = text
-    .trim()
-    .toLowerCase()
-    .match(/\b(\d+)\s*(s|sec|secs|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|hour|hours)\b/);
+  const m = normalizeText(text).match(
+    /\b(\d+)\s*(s|sec|secs|seconde|secondes|second|seconds|m|min|mins|minute|minutes|h|hr|hrs|heure|heures|hour|hours)\b/
+  );
   if (!m) return undefined;
   const n = Number(m[1]);
   const unit = m[2];
   if (!Number.isFinite(n) || n <= 0) return undefined;
   if (unit.startsWith('h')) return n * 3600;
+  if (unit.startsWith('heu')) return n * 3600;
   if (unit.startsWith('m')) return n * 60;
   return n;
 }
@@ -17,9 +19,12 @@ function parseDurationSeconds(text: string): number | undefined {
 export const timerSkill: Skill = {
   name: 'timer',
   match: (input) => {
-    const t = input.text.trim().toLowerCase();
-    if (t.startsWith('timer')) return { score: 0.8, intent: 'timer.set' };
-    if (t.includes('set a timer') || t.includes('set timer'))
+    const t = normalizeText(input.text);
+    if (t.startsWith('timer') || t.startsWith('minuteur')) return { score: 0.8, intent: 'timer.set' };
+    if (t.includes('set a timer') || t.includes('set timer')) return { score: 0.7, intent: 'timer.set' };
+    if (t.includes('mets un minuteur') || t.includes('met un minuteur') || t.includes('lance un minuteur'))
+      return { score: 0.75, intent: 'timer.set' };
+    if (t.includes('mets un timer') || t.includes('met un timer') || t.includes('lance un timer'))
       return { score: 0.7, intent: 'timer.set' };
     return { score: 0 };
   },
