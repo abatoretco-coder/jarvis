@@ -4,6 +4,7 @@ import { homeAssistantSkill } from './skills/homeAssistant';
 import { inboxSkill } from './skills/inbox';
 import { lightsSkill } from './skills/lights';
 import { musicSkill } from './skills/music';
+import { plexSkill } from './skills/plex';
 import { pingSkill } from './skills/ping';
 import { robotSkill } from './skills/robot';
 import { timeSkill } from './skills/time';
@@ -23,6 +24,7 @@ async function main() {
     homeAssistantSkill,
     inboxSkill,
     musicSkill,
+    plexSkill,
     robotSkill,
   ];
 

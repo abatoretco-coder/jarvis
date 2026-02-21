@@ -8,6 +8,7 @@ import { homeAssistantSkill } from './skills/homeAssistant';
 import { inboxSkill } from './skills/inbox';
 import { lightsSkill } from './skills/lights';
 import { musicSkill } from './skills/music';
+import { plexSkill } from './skills/plex';
 import { pingSkill } from './skills/ping';
 import { robotSkill } from './skills/robot';
 import { timeSkill } from './skills/time';
@@ -32,6 +33,7 @@ const env = {
   OPENAI_MODEL: 'gpt-5-mini',
   OPENAI_BASE_URL: undefined,
   OPENAI_TIMEOUT_MS: 1000,
+  OPENAI_ROUTER_MODE: 'fallback',
 
   MEMORY_DIR: path.join(os.tmpdir(), 'jarvis-test-memory'),
   MEMORY_TTL_HOURS: 24,
@@ -240,6 +242,22 @@ describe('server', () => {
     expect(body.actions.length).toBe(1);
     expect(body.actions[0].type).toBe('music.play_request');
     expect(String(body.actions[0].query).toLowerCase()).toContain('daft');
+    await app.close();
+  });
+
+  it('POST /v1/command routes plex (FR)', async () => {
+    const app = await buildServer(env, [plexSkill]);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: 'Mets Plex The Office' },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.skill).toBe('plex');
+    expect(body.actions.length).toBe(1);
+    expect(body.actions[0].type).toBe('plex.play_request');
+    expect(String(body.actions[0].query).toLowerCase()).toContain('office');
     await app.close();
   });
 

@@ -38,6 +38,10 @@ const envSchema = z
     OPENAI_MODEL: z.string().default('gpt-5-mini'),
     OPENAI_BASE_URL: z.string().url().optional(),
     OPENAI_TIMEOUT_MS: numberFromEnv.default('20000'),
+    // Controls how often the LLM router is called.
+    // - fallback: only when no deterministic skill matches.
+    // - always_actions: call LLM on every request, but only use it when it outputs actions; otherwise keep deterministic result.
+    OPENAI_ROUTER_MODE: z.enum(['fallback', 'always_actions']).default('fallback'),
 
     // Conversation memory (24h sliding window)
     MEMORY_DIR: z.string().default('/app/data/memory'),

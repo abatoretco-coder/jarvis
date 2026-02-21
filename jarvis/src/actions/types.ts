@@ -21,6 +21,11 @@ export type MusicPlayRequestAction = {
   query: string;
 };
 
+export type PlexPlayRequestAction = {
+  type: 'plex.play_request';
+  query: string;
+};
+
 export type RobotStartAction = {
   type: 'robot.start';
   robot: string;
@@ -56,6 +61,7 @@ export type JarvisAction =
   | HomeAssistantServiceCallAction
   | TodoAddTaskAction
   | MusicPlayRequestAction
+  | PlexPlayRequestAction
   | RobotStartAction
   | TimerRequestedAction
   | WeatherQueryAction
