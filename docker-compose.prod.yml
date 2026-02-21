@@ -3,8 +3,11 @@ services:
     image: ghcr.io/abatoretco-coder/jarvis:main
     build:
       context: ./jarvis
+      target: runtime
     ports:
       - '8080:8080'
     env_file:
       - ./jarvis/.env
+    volumes:
+      - /opt/naas/appdata/jarvis-vm300:/app/data
     restart: unless-stopped

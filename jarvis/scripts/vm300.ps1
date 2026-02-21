@@ -125,13 +125,13 @@ switch ($Command) {
       '-o', 'BatchMode=yes',
       '-o', 'StrictHostKeyChecking=accept-new',
       $Target,
-      "umask 077; mkdir -p $RepoPath; cat > $RepoPath/.env"
+      "umask 077; mkdir -p $RepoPath/jarvis; cat > $RepoPath/jarvis/.env"
     )
 
     $content | & $sshExe @args
     if ($LASTEXITCODE -ne 0) { throw "Failed to upload .env (exit $LASTEXITCODE)." }
 
-    Write-Host "Uploaded .env to ${Target}:${RepoPath}/.env"
+    Write-Host "Uploaded .env to ${Target}:${RepoPath}/jarvis/.env"
     break
   }
 
@@ -144,7 +144,7 @@ switch ($Command) {
       'git fetch --all --prune',
       'git reset --hard origin/main',
       'git pull --ff-only',
-      "test -f .env || (echo 'Missing .env (run push-env first)'; exit 2)",
+      "test -f jarvis/.env || (echo 'Missing jarvis/.env (run push-env first)'; exit 2)",
       'docker compose -f docker-compose.prod.yml up -d --build'
     ) -join "`n"
 
