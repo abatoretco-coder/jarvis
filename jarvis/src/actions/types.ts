@@ -33,6 +33,14 @@ export type TimerRequestedAction = {
   requestedAt: string;
 };
 
+export type WeatherQueryAction = {
+  type: 'weather.query';
+  /** Optional explicit Home Assistant weather entity_id (weather.xxx). */
+  entityId?: string;
+  /** now = current conditions, today/tomorrow/week use forecast when available. */
+  when: 'now' | 'today' | 'tomorrow' | 'week';
+};
+
 export type ConnectorName = 'email' | 'whatsapp' | 'messenger' | 'sms' | 'todo';
 
 export type ConnectorOperation = 'read_latest' | 'summarize' | 'search' | 'list' | 'create';
@@ -50,6 +58,7 @@ export type JarvisAction =
   | MusicPlayRequestAction
   | RobotStartAction
   | TimerRequestedAction
+  | WeatherQueryAction
   | ConnectorRequestAction;
 
 export type ExecutedAction = {

@@ -9,12 +9,14 @@ import { robotSkill } from './skills/robot';
 import { timeSkill } from './skills/time';
 import { timerSkill } from './skills/timer';
 import { todoSkill } from './skills/todo';
+import { weatherSkill } from './skills/weather';
 
 async function main() {
   const env = loadEnv();
   const skills = [
     pingSkill,
     timeSkill,
+    weatherSkill,
     todoSkill,
     timerSkill,
     lightsSkill,

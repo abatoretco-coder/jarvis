@@ -12,6 +12,7 @@ import { pingSkill } from './skills/ping';
 import { robotSkill } from './skills/robot';
 import { timeSkill } from './skills/time';
 import { timerSkill } from './skills/timer';
+import { weatherSkill } from './skills/weather';
 
 const env = {
   PORT: 8080,
@@ -119,6 +120,23 @@ describe('server', () => {
     const body = res.json();
     expect(body.skill).toBe('time');
     expect(body.intent).toBe('time.now');
+    await app.close();
+  });
+
+  it('POST /v1/command routes weather (FR)', async () => {
+    const app = await buildServer(env, [weatherSkill]);
+    const res = await app.inject({
+      method: 'POST',
+      url: '/v1/command',
+      payload: { text: 'Quelle météo demain ?' },
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.skill).toBe('weather');
+    expect(String(body.intent)).toContain('weather.');
+    expect(body.actions.length).toBe(1);
+    expect(body.actions[0].type).toBe('weather.query');
+    expect(body.actions[0].when).toBe('tomorrow');
     await app.close();
   });
 

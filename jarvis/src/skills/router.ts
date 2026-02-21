@@ -36,6 +36,7 @@ export async function routeAndRun(
           'Exemples:',
           '- ping',
           '- time (ou: quelle heure est-il ?)',
+          '- quelle météo ? (ou: météo demain | météo semaine | météo entity=weather.xxx)',
           '- todo: acheter du lait (ou: ajoute une tâche appeler le dentiste)',
           '- allume la lumière cuisine 40%',
           '- ha: <domain>.<service> entity_id=<id> key=value ...',
