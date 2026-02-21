@@ -8,15 +8,3 @@ services:
     env_file:
       - ./jarvis/.env
     restart: unless-stopped
-
-  obeissant:
-    profiles: ["vm400"]
-    build:
-      context: ./obeissant
-    ports:
-      - '8090:8090'
-    env_file:
-      - ./obeissant/.env
-    volumes:
-      - /opt/naas/appdata/jarvis-vm400:/app/data
-    restart: unless-stopped

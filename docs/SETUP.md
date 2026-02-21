@@ -11,12 +11,9 @@ docker compose -f docker-compose.dev.yml up --build
 
 Home Assistant est séparé (repo dédié). En local, si tu l’exécutes sur la même machine via Docker, pense à configurer `HA_BASE_URL` pour que **Jarvis dans son conteneur** atteigne HA (ex: Docker Desktop: `http://host.docker.internal:8123`).
 
-Optional (also run VM400 connectors):
+VM400 connectors (Obéissant) sont dans le dépôt Home Assistant:
 
-```bash
-cp obeissant/.env.example obeissant/.env
-docker compose -f docker-compose.dev.yml --profile vm400 up --build
-```
+- https://github.com/abatoretco-coder/home-assistant
 
 The service listens on `http://localhost:8080` by default.
 
@@ -132,11 +129,9 @@ cd /opt/naas/stacks/jarvis
 cp jarvis/.env.example jarvis/.env
 ```
 
-Optional (only if you want to run VM400 connectors from the same stack folder):
+VM400 connectors (Obéissant) are not part of this repo anymore.
 
-```bash
-cp obeissant/.env.example obeissant/.env
-```
+See: https://github.com/abatoretco-coder/home-assistant
 
 Edit `docker-compose.prod.yml` and set the image to your published tag:
 

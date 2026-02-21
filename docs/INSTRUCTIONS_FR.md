@@ -3,7 +3,13 @@
 Ce dépôt contient :
 
 - **Jarvis (VM300)** : le “cerveau” (texte → intentions → actions codifiées)
-- **Obéissant / VM400 Orchestrator (VM400)** : la “couche d’exécution” (voix/téléphone → Jarvis → connecteurs Gmail/Android/HA)
+
+Le repo Home Assistant (VM400) contient :
+
+- **Home Assistant (VM400)** : Assist/voix + intégrations domotique
+- **Obéissant / VM400 Orchestrator (VM400)** : couche d’exécution (voix/téléphone → Jarvis → connecteurs Gmail/Android/HA)
+
+Repo: https://github.com/abatoretco-coder/home-assistant
 
 ## 0) Pré-requis
 
@@ -37,14 +43,7 @@ cp jarvis/.env.example jarvis/.env
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-Home Assistant (UI) : `http://localhost:8123`.
-
-Optionnel (démarrer aussi Obéissant / VM400) :
-
-```bash
-cp obeissant/.env.example obeissant/.env
-docker compose -f docker-compose.dev.yml --profile vm400 up --build
-```
+Si Home Assistant tourne localement en Docker sur la même machine, configure `HA_BASE_URL` dans `jarvis/.env` pour que Jarvis (conteneur) atteigne HA (souvent: `http://host.docker.internal:8123`).
 
 Test :
 
@@ -95,24 +94,25 @@ curl -s http://<VM300_IP>:8080/v1/command \
 
 ## 4) Déployer VM400 orchestrator (Gmail + Android)
 
-Le dossier est : `obeissant/`.
-
-Sur VM400 :
+Sur VM400, clone le repo Home Assistant (qui contient aussi `obeissant/`) :
 
 ```bash
-sudo mkdir -p /opt/naas/stacks/jarvis-vm400
+sudo mkdir -p /opt/naas/stacks/home-assistant
 sudo mkdir -p /opt/naas/appdata/jarvis-vm400
-cd /opt/naas/stacks/jarvis-vm400
+git clone https://github.com/abatoretco-coder/home-assistant.git /opt/naas/stacks/home-assistant
+cd /opt/naas/stacks/home-assistant
 
-# Copier le dossier obeissant/ ici
+# Home Assistant (sans connecteurs)
+docker compose -f docker-compose.prod.yml up -d
+
+# Optionnel: Obéissant (connecteurs VM400)
 cp obeissant/.env.example obeissant/.env
-
-docker compose -f obeissant/docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml --profile vm400 up -d --build
 ```
 
 ### 4.1 Config VM400 → Jarvis
 
-Dans `obeissant/.env` :
+Dans `obeissant/.env` (VM400) :
 
 ```dotenv
 JARVIS_BASE_URL=http://<VM300_IP>:8080

@@ -3,7 +3,8 @@
 Repo layout:
 
 - `jarvis/`: VM300 brain (text → codified actions)
-- `obeissant/`: (optional) VM400 execution layer (connectors like Gmail + Android SMS)
+
+VM400 execution/connectors (Obéissant) is in the Home Assistant repo: https://github.com/abatoretco-coder/home-assistant
 
 Home Assistant est dans un dépôt séparé : https://github.com/abatoretco-coder/home-assistant
 
@@ -13,12 +14,6 @@ Home Assistant est dans un dépôt séparé : https://github.com/abatoretco-code
 
 ```bash
 cp jarvis/.env.example jarvis/.env
-```
-
-Optional (VM400 connector executor):
-
-```bash
-cp obeissant/.env.example obeissant/.env
 ```
 
 2. Start:
@@ -33,11 +28,7 @@ docker compose -f docker-compose.dev.yml up --build
 curl -s http://localhost:8080/health | jq
 ```
 
-To also run VM400 connectors (optional):
-
-```bash
-docker compose -f docker-compose.dev.yml --profile vm400 up --build
-```
+VM400 connectors are run from the Home Assistant repo (Obéissant).
 
 ## API
 
@@ -129,10 +120,10 @@ Voice satellites (Raspberry Pi / Bluetooth): see [docs/VOICE_SATELLITES.md](docs
 
 Multi-VM (VM300 Jarvis + VM400 Home Assistant): see [docs/MULTI_VM.md](docs/MULTI_VM.md).
 
-VM400 execution/connectors: see [docs/CONNECTORS.md](docs/CONNECTORS.md).
+VM400 execution/connectors: see https://github.com/abatoretco-coder/home-assistant
 
 French step-by-step: see [docs/INSTRUCTIONS_FR.md](docs/INSTRUCTIONS_FR.md).
 
 Home Assistant controllers (Plex/Hue/Xiaomi/Spotify): see https://github.com/abatoretco-coder/home-assistant
 
-VM400 orchestrator reference service: see `obeissant/`.
+VM400 orchestrator reference service: see `obeissant/` in https://github.com/abatoretco-coder/home-assistant

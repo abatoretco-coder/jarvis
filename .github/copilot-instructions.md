@@ -7,7 +7,7 @@
     - Entry: `jarvis/src/index.ts` → `buildServer` (`jarvis/src/server.ts`)
     - Main endpoint: `POST /v1/command` (`jarvis/src/routes/command.ts`)
   - **VM400 Orchestrator / Obéissant (execution layer, optional reference)**: executes connector actions (e.g. Gmail/SMS) and calls Jarvis in plan mode.
-    - Location: `obeissant/`
+    - Location: in the Home Assistant repo: https://github.com/abatoretco-coder/home-assistant
 
 ## Data flow (VM400 → VM300)
 
@@ -56,7 +56,7 @@
 - Jarvis image: `jarvis/Dockerfile` (runtime installs `--omit=dev`)
 - Multi-VM guidance:
   - `docs/MULTI_VM.md` (VM300 Jarvis + VM400 Home Assistant)
-  - `docs/CONNECTORS.md` (VM400 connectors; Gmail+Android reference)
+  - VM400 connectors live in: https://github.com/abatoretco-coder/home-assistant
 
 ## GitHub Actions
 

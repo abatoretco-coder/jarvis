@@ -133,7 +133,7 @@ Types existants :
 - `robot.start` (planifié)
 - `timer.requested` (planifié)
 
-Execution layer notes: see [docs/CONNECTORS.md](CONNECTORS.md).
+Execution layer notes: see https://github.com/abatoretco-coder/home-assistant
 
 Si tu veux que VM400 envoie des événements structurés (pas du texte), dis-moi et j’ajoute un endpoint `POST /v1/event` (avec schéma Zod) + une skill “events”.
 
