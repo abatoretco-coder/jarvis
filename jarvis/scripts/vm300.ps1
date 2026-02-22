@@ -160,7 +160,7 @@ switch ($Command) {
       'end=$((SECONDS+' + $WaitSeconds + '))',
       'code=0',
       'while [ $SECONDS -lt $end ]; do',
-      '  code=$(wget -qO- http://127.0.0.1:8080/health 2>/dev/null | head -c 20 | wc -c | tr -d " ") || true',
+      '  code=$(wget -qO- http://192.168.1.175:8080/health 2>/dev/null | head -c 20 | wc -c | tr -d " ") || true',
       '  if [ "$code" -gt 0 ]; then echo OK; exit 0; fi',
       '  sleep 2',
       'done',
@@ -180,7 +180,7 @@ switch ($Command) {
       'echo "== COMPOSE PS =="',
       'docker compose -f docker-compose.prod.yml ps || true',
       'echo "== HEALTH =="',
-      'wget -qO- http://127.0.0.1:8080/health | head -c 400 || true',
+      'wget -qO- http://192.168.1.175:8080/health | head -c 400 || true',
       'echo'
     ) -join "`n"
 
